@@ -64,8 +64,8 @@ EELAYER END
 $Descr A4 11693 8268
 encoding utf-8
 Sheet 1 1
-Title "CAN Bricklet"
-Date "Di 10 Nov 2015"
+Title "Real Time Clock Bricklet"
+Date "Di 17 Nov 2015"
 Rev "1.0"
 Comp "Tinkerforge GmbH"
 Comment1 "Licensed under CERN OHL v.1.1"

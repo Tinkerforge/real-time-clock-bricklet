@@ -3,7 +3,7 @@
   (general
     (links 33)
     (no_connects 0)
-    (area 108.55782 87.245139 282.895869 162.490743)
+    (area 124.445139 87.245139 282.895869 162.490743)
     (thickness 1.6002)
     (drawings 11)
     (tracks 123)
@@ -14,8 +14,8 @@
 
   (page A4)
   (title_block
-    (title "Serial Bricklet")
-    (date "5 mar 2015")
+    (title "Real Time Clock Bricklet")
+    (date "Di 17 Nov 2015")
     (rev 1.0)
     (company "Tinkerforge GmbH")
     (comment 1 "Licensed under CERN OHL v.1.1")
@@ -41,7 +41,7 @@
   )
 
   (setup
-    (last_trace_width 0.5)
+    (last_trace_width 0.249)
     (user_trace_width 0.25)
     (user_trace_width 0.29972)
     (user_trace_width 0.35052)
