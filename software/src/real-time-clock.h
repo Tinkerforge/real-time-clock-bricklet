@@ -25,25 +25,27 @@
 #include <stdint.h>
 #include "bricklib/com/com_common.h"
 
+#define CALIBRATION_EEPROM_POSITION (BRICKLET_PLUGIN_MAX_SIZE + 96)
+#define CALIBRATION_EEPROM_MAGIC0   0b10101010
+#define CALIBRATION_EEPROM_MAGIC1   0b00110011
+
 #define FID_SET_MODE 1
 #define FID_GET_MODE 2
 #define FID_SET_RTC_DATE_TIME 3
 #define FID_GET_RTC_DATE_TIME 4
-#define FID_SET_RTC_ALARM1 5
-#define FID_GET_RTC_ALARM1 6
-#define FID_SET_RTC_ALARM2 7
-#define FID_GET_RTC_ALARM2 8
-#define FID_SET_STOPWATCH_TIME 9
-#define FID_GET_STOPWATCH_TIME 10
-#define FID_SET_STOPWATCH_ALARM1 11
-#define FID_GET_STOPWATCH_ALARM1 12
-#define FID_SET_STOPWATCH_ALARM2 13
-#define FID_GET_STOPWATCH_ALARM2 15
-#define FID_SET_COUNTDOWN 16
-#define FID_GET_COUNTDOWN 17
-#define FID_RTC_ALARM 18
-#define FID_STOPWATCH_ALARM 19
-#define FID_COUNTDOWN 20
+#define FID_SET_RTC_ALARM 5
+#define FID_GET_RTC_ALARM 6
+#define FID_SET_STOPWATCH_TIME 7
+#define FID_GET_STOPWATCH_TIME 8
+#define FID_SET_STOPWATCH_ALARM 9
+#define FID_GET_STOPWATCH_ALARM 10
+#define FID_SET_COUNTDOWN 11
+#define FID_GET_COUNTDOWN 12
+#define FID_SET_CALIBRATION 13
+#define FID_GET_CALIBRATION 14
+#define FID_RTC_ALARM 15
+#define FID_STOPWATCH_ALARM 16
+#define FID_COUNTDOWN 17
 
 typedef struct {
 	MessageHeader header;
@@ -93,16 +95,19 @@ typedef struct {
 
 typedef struct {
 	MessageHeader header;
+	uint8_t alarm;
 	int8_t month;
 	int8_t day;
 	int8_t hour;
 	int8_t minute;
 	int8_t second;
-} __attribute__((__packed__)) SetRTCAlarm1;
+	int8_t weekday;
+} __attribute__((__packed__)) SetRTCAlarm;
 
 typedef struct {
 	MessageHeader header;
-} __attribute__((__packed__)) GetRTCAlarm1;
+	uint8_t alarm;
+} __attribute__((__packed__)) GetRTCAlarm;
 
 typedef struct {
 	MessageHeader header;
@@ -111,25 +116,8 @@ typedef struct {
 	int8_t hour;
 	int8_t minute;
 	int8_t second;
-} __attribute__((__packed__)) GetRTCAlarm1Return;
-
-typedef struct {
-	MessageHeader header;
 	int8_t weekday;
-	int8_t hour;
-	int8_t minute;
-} __attribute__((__packed__)) SetRTCAlarm2;
-
-typedef struct {
-	MessageHeader header;
-} __attribute__((__packed__)) GetRTCAlarm2;
-
-typedef struct {
-	MessageHeader header;
-	int8_t weekday;
-	int8_t hour;
-	int8_t minute;
-} __attribute__((__packed__)) GetRTCAlarm2Return;
+} __attribute__((__packed__)) GetRTCAlarmReturn;
 
 typedef struct {
 	MessageHeader header;
@@ -153,37 +141,23 @@ typedef struct {
 
 typedef struct {
 	MessageHeader header;
+	uint8_t alarm;
 	int32_t hour;
 	int8_t minute;
 	int8_t second;
-} __attribute__((__packed__)) SetStopwatchAlarm1;
+} __attribute__((__packed__)) SetStopwatchAlarm;
 
 typedef struct {
 	MessageHeader header;
-} __attribute__((__packed__)) GetStopwatchAlarm1;
+	uint8_t alarm;
+} __attribute__((__packed__)) GetStopwatchAlarm;
 
 typedef struct {
 	MessageHeader header;
 	int32_t hour;
 	int8_t minute;
 	int8_t second;
-} __attribute__((__packed__)) GetStopwatchAlarm1Return;
-
-typedef struct {
-	MessageHeader header;
-	int16_t hour;
-	int8_t minute;
-} __attribute__((__packed__)) SetStopwatchAlarm2;
-
-typedef struct {
-	MessageHeader header;
-} __attribute__((__packed__)) GetStopwatchAlarm2;
-
-typedef struct {
-	MessageHeader header;
-	int16_t hour;
-	int8_t minute;
-} __attribute__((__packed__)) GetStopwatchAlarm2Return;
+} __attribute__((__packed__)) GetStopwatchAlarmReturn;
 
 typedef struct {
 	MessageHeader header;
@@ -202,6 +176,22 @@ typedef struct {
 	uint8_t counter;
 	uint8_t step;
 } __attribute__((__packed__)) GetCountdownReturn;
+
+typedef struct {
+	MessageHeader header;
+	uint8_t mode;
+	int8_t offset;
+} __attribute__((__packed__)) SetCalibration;
+
+typedef struct {
+	MessageHeader header;
+} __attribute__((__packed__)) GetCalibration;
+
+typedef struct {
+	MessageHeader header;
+	uint8_t mode;
+	int8_t offset;
+} __attribute__((__packed__)) GetCalibrationReturn;
 
 typedef struct {
 	MessageHeader header;
@@ -236,29 +226,26 @@ void get_mode(const ComType com, const GetMode *data);
 void set_rtc_date_time(const ComType com, const SetRTCDateTime *data);
 void get_rtc_date_time(const ComType com, const GetRTCDateTime *data);
 
-void set_rtc_alarm1(const ComType com, const SetRTCAlarm1 *data);
-void get_rtc_alarm1(const ComType com, const GetRTCAlarm1 *data);
-
-void set_rtc_alarm2(const ComType com, const SetRTCAlarm2 *data);
-void get_rtc_alarm2(const ComType com, const GetRTCAlarm2 *data);
+void set_rtc_alarm(const ComType com, const SetRTCAlarm *data);
+void get_rtc_alarm(const ComType com, const GetRTCAlarm *data);
 
 void set_stopwatch_time(const ComType com, const SetStopwatchTime *data);
 void get_stopwatch_time(const ComType com, const GetStopwatchTime *data);
 
-void set_stopwatch_alarm1(const ComType com, const SetStopwatchAlarm1 *data);
-void get_stopwatch_alarm1(const ComType com, const GetStopwatchAlarm1 *data);
-
-void set_stopwatch_alarm2(const ComType com, const SetStopwatchAlarm2 *data);
-void get_stopwatch_alarm2(const ComType com, const GetStopwatchAlarm2 *data);
+void set_stopwatch_alarm(const ComType com, const SetStopwatchAlarm *data);
+void get_stopwatch_alarm(const ComType com, const GetStopwatchAlarm *data);
 
 void set_countdown(const ComType com, const SetCountdown *data);
 void get_countdown(const ComType com, const GetCountdown *data);
 
+void set_calibration(const ComType com, const SetCalibration *data);
+void get_calibration(const ComType com, const GetCalibration *data);
+
 uint8_t read_register(const uint8_t reg);
 void read_registers(const uint8_t reg, uint8_t *data, const uint8_t length);
-void clear_interrupt();
 void write_register(const uint8_t reg, uint8_t value);
 void write_registers(const uint8_t reg, uint8_t *data, const uint8_t length);
+void i2c_foobar(bool high);
 bool i2c_scl_value(void);
 void i2c_scl_high(void);
 void i2c_scl_low(void);

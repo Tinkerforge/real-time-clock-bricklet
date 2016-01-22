@@ -44,8 +44,8 @@
 #define PIN_SCL (BS->pin2_da)
 #define PIN_INT (BS->pin3_pwm)
 
-#define LOGGING_LEVEL LOGGING_DEBUG
-#define DEBUG_BRICKLET 1
+//#define LOGGING_LEVEL LOGGING_DEBUG
+//#define DEBUG_BRICKLET 1
 #define BOARD_MCK 64000000
 
 #define MODE_RTC                                  0
@@ -58,6 +58,9 @@
 #define COUNTDOWN_STEP_1000MS                     1
 #define COUNTDOWN_STEP_250MS                      2
 #define COUNTDOWN_STEP_62MS                       3
+
+#define CALIBRATION_MODE_LOW_POWER                0
+#define CALIBRATION_MODE_FAST_CORRECTION          1
 
 #define REG_RAW_CLOCK_100TH_SECOND                0x00
 #define REG_RAW_ALARM_ENABLE                      0x10
@@ -189,9 +192,13 @@
 #define REG_STOPWATCH_ALARM_ENABLE_A2E_HOUR1      0b01000000
 #define REG_STOPWATCH_ALARM_ENABLE_A2E_HOUR2      0b10000000
 
+#define REG_OSCILLATOR_OFFM_mask                  0b01000000
+#define REG_OSCILLATOR_OFFM_LOW_POWER             0b00000000
+#define REG_OSCILLATOR_OFFM_FAST_CONNECTION       0b01000000
+
 #define REG_OSCILLATOR_1224_mask                  0b00100000
-#define REG_OSCILLATOR_1224_12                    0b00000000
-#define REG_OSCILLATOR_1224_24                    0b00100000
+#define REG_OSCILLATOR_1224_24                    0b00000000
+#define REG_OSCILLATOR_1224_12                    0b00100000
 
 #define REG_OSCILLATOR_OSCD_mask                  0b00001100
 #define REG_OSCILLATOR_OSCD_NORMAL                0b00000000
@@ -261,6 +268,7 @@
 typedef struct {
 	uint8_t mode;
 	uint8_t flags;
+	uint8_t calibration[4]; // mode, offset, magic0, magic1
 } BrickContext;
 
 #endif
