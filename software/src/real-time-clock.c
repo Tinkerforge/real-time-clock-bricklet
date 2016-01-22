@@ -136,23 +136,23 @@ void constructor(void) {
 	                           (char *)bc->calibration,
 	                           sizeof(bc->calibration));
 
-	if (bc->calibration[2] == CALIBRATION_EEPROM_MAGIC0 &&
-	    bc->calibration[3] == CALIBRATION_EEPROM_MAGIC0) {
-		write_register(REG_OFFSET, bc->calibration[1]);
+	if (bc->calibration[0] == CALIBRATION_EEPROM_MAGIC0 &&
+	    bc->calibration[1] == CALIBRATION_EEPROM_MAGIC0) {
+		write_register(REG_OFFSET, bc->calibration[3]);
 	} else {
 		// EEPROM doesn't contain calibration, store current calibration
-		bc->calibration[2] = CALIBRATION_EEPROM_MAGIC0;
-		bc->calibration[3] = CALIBRATION_EEPROM_MAGIC1;
+		bc->calibration[0] = CALIBRATION_EEPROM_MAGIC0;
+		bc->calibration[1] = CALIBRATION_EEPROM_MAGIC1;
 
 		uint8_t offm = read_register(REG_OSCILLATOR) & REG_OSCILLATOR_OFFM_mask;
 
 		if (offm == REG_OSCILLATOR_OFFM_LOW_POWER) {
-			bc->calibration[0] = CALIBRATION_MODE_LOW_POWER;
+			bc->calibration[2] = CALIBRATION_MODE_LOW_POWER;
 		} else {
-			bc->calibration[0] = CALIBRATION_MODE_FAST_CORRECTION;
+			bc->calibration[2] = CALIBRATION_MODE_FAST_CORRECTION;
 		}
 
-		bc->calibration[1] = read_register(REG_OFFSET);
+		bc->calibration[3] = read_register(REG_OFFSET);
 
 		ba->i2c_eeprom_master_write(ba->twid->pTwi,
 		                            CALIBRATION_EEPROM_POSITION,
@@ -165,7 +165,7 @@ void constructor(void) {
 	// Select offset calibration mode and 12.5pF oscillator load capacitance
 	uint8_t oscillator;
 
-	if (bc->calibration[0] == CALIBRATION_MODE_LOW_POWER) {
+	if (bc->calibration[2] == CALIBRATION_MODE_LOW_POWER) {
 		oscillator = REG_OSCILLATOR_OFFM_LOW_POWER;
 	} else {
 		oscillator = REG_OSCILLATOR_OFFM_FAST_CONNECTION;
@@ -654,19 +654,19 @@ void set_calibration(const ComType com, const SetCalibration *data) {
 		return;
 	}
 
-	bc->calibration[0] = data->mode;
-	bc->calibration[1] = data->offset;
+	bc->calibration[2] = data->mode;
+	bc->calibration[3] = data->offset;
 
 	uint8_t oscillator = REG_OSCILLATOR_CL_12PF;
 
-	if (bc->calibration[0] != CALIBRATION_MODE_LOW_POWER) {
+	if (bc->calibration[2] != CALIBRATION_MODE_LOW_POWER) {
 		oscillator |= REG_OSCILLATOR_OFFM_LOW_POWER;
 	} else {
 		oscillator |= REG_OSCILLATOR_OFFM_FAST_CONNECTION;
 	}
 
 	write_register(REG_OSCILLATOR, oscillator);
-	write_register(REG_OFFSET, bc->calibration[1]);
+	write_register(REG_OFFSET, bc->calibration[3]);
 
 	ba->bricklet_select(port);
 	ba->i2c_eeprom_master_write(ba->twid->pTwi,
@@ -682,8 +682,8 @@ void get_calibration(const ComType com, const GetCalibration *data) {
 
 	gcr.header        = data->header;
 	gcr.header.length = sizeof(gcr);
-	gcr.mode          = bc->calibration[0];
-	gcr.offset        = bc->calibration[1];
+	gcr.mode          = bc->calibration[2];
+	gcr.offset        = bc->calibration[3];
 
 	BA->send_blocking_with_timeout(&gcr, sizeof(gcr), com);
 }
