@@ -41,11 +41,13 @@
 #define FID_GET_STOPWATCH_ALARM 10
 #define FID_SET_COUNTDOWN 11
 #define FID_GET_COUNTDOWN 12
-#define FID_SET_CALIBRATION 13
-#define FID_GET_CALIBRATION 14
-#define FID_RTC_ALARM 15
-#define FID_STOPWATCH_ALARM 16
-#define FID_COUNTDOWN 17
+#define FID_SET_USER_DATA 13
+#define FID_GET_USER_DATA 14
+#define FID_SET_CALIBRATION 15
+#define FID_GET_CALIBRATION 16
+#define FID_RTC_ALARM 17
+#define FID_STOPWATCH_ALARM 18
+#define FID_COUNTDOWN 19
 
 typedef struct {
 	MessageHeader header;
@@ -179,6 +181,20 @@ typedef struct {
 
 typedef struct {
 	MessageHeader header;
+	uint8_t data;
+} __attribute__((__packed__)) SetUserData;
+
+typedef struct {
+	MessageHeader header;
+} __attribute__((__packed__)) GetUserData;
+
+typedef struct {
+	MessageHeader header;
+	uint8_t data;
+} __attribute__((__packed__)) GetUserDataReturn;
+
+typedef struct {
+	MessageHeader header;
 	uint8_t mode;
 	int8_t offset;
 } __attribute__((__packed__)) SetCalibration;
@@ -237,6 +253,9 @@ void get_stopwatch_alarm(const ComType com, const GetStopwatchAlarm *data);
 
 void set_countdown(const ComType com, const SetCountdown *data);
 void get_countdown(const ComType com, const GetCountdown *data);
+
+void set_user_data(const ComType com, const SetUserData *data);
+void get_user_data(const ComType com, const GetUserData *data);
 
 void set_calibration(const ComType com, const SetCalibration *data);
 void get_calibration(const ComType com, const GetCalibration *data);

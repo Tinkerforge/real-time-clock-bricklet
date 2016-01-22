@@ -268,6 +268,7 @@
 typedef struct {
 	uint8_t mode;
 	uint8_t flags;
+	uint8_t user_data;
 	uint8_t calibration[4]; // mode, offset, magic0, magic1
 } BrickContext;
 

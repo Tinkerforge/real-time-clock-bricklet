@@ -89,6 +89,15 @@ void invocation(const ComType com, const uint8_t *data) {
 			get_countdown(com, (GetCountdown*)data);
 			return;
 
+		case FID_SET_USER_DATA:
+			set_user_data(com, (SetUserData*)data);
+			ba->com_return_setter(com, data);
+			return;
+
+		case FID_GET_USER_DATA:
+			get_user_data(com, (GetUserData*)data);
+			return;
+
 		case FID_SET_CALIBRATION:
 			set_calibration(com, (SetCalibration*)data);
 			ba->com_return_setter(com, data);
@@ -112,6 +121,8 @@ void constructor(void) {
 	_Static_assert(sizeof(BrickContext) <= BRICKLET_CONTEXT_MAX_SIZE, "BrickContext too big");
 
 	bc->flags = 0;
+	bc->user_data = read_register(REG_RAM_BYTE);
+
 	// Setting the interrupt pin as input
 	PIN_INT.pio->PIO_PUER = PIN_INT.mask;
 	PIN_INT.pio->PIO_ODR = PIN_INT.mask;
@@ -617,6 +628,20 @@ void get_countdown(const ComType com, const GetCountdown *data) {
 	gcr.step    = (watchdog & REG_WATCHDOG_STEP_mask)    >> REG_WATCHDOG_STEP_offset;
 
 	BA->send_blocking_with_timeout(&gcr, sizeof(gcr), com);
+}
+
+void set_user_data(const ComType com, const SetUserData *data) {
+	write_register(REG_WATCHDOG, data->data);
+}
+
+void get_user_data(const ComType com, const GetUserData *data) {
+	GetUserDataReturn gudr;
+
+	gudr.header        = data->header;
+	gudr.header.length = sizeof(gudr);
+	gudr.data          = BC->user_data;
+
+	BA->send_blocking_with_timeout(&gudr, sizeof(gudr), com);
 }
 
 void set_calibration(const ComType com, const SetCalibration *data) {
