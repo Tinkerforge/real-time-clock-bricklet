@@ -111,6 +111,7 @@ void constructor(void) {
 
 	_Static_assert(sizeof(BrickContext) <= BRICKLET_CONTEXT_MAX_SIZE, "BrickContext too big");
 
+	bc->flags = 0;
 	// Setting the interrupt pin as input
 	PIN_INT.pio->PIO_PUER = PIN_INT.mask;
 	PIN_INT.pio->PIO_ODR = PIN_INT.mask;
@@ -123,8 +124,6 @@ void constructor(void) {
 	                           CALIBRATION_EEPROM_POSITION,
 	                           (char *)bc->calibration,
 	                           sizeof(bc->calibration));
-
-	uint8_t oscillator = 0;
 
 	if (bc->calibration[2] == CALIBRATION_EEPROM_MAGIC0 &&
 	    bc->calibration[3] == CALIBRATION_EEPROM_MAGIC0) {
@@ -152,13 +151,15 @@ void constructor(void) {
 
 	ba->bricklet_deselect(port);
 
+	// Select offset calibration mode and 12.5pF oscillator load capacitance
+	uint8_t oscillator;
+
 	if (bc->calibration[0] == CALIBRATION_MODE_LOW_POWER) {
-		oscillator |= REG_OSCILLATOR_OFFM_LOW_POWER;
+		oscillator = REG_OSCILLATOR_OFFM_LOW_POWER;
 	} else {
-		oscillator |= REG_OSCILLATOR_OFFM_FAST_CONNECTION;
+		oscillator = REG_OSCILLATOR_OFFM_FAST_CONNECTION;
 	}
 
-	// Set 24h mode and select 12.5pF oscillator load capacitance
 	write_register(REG_OSCILLATOR, oscillator | REG_OSCILLATOR_CL_12PF);
 
 	// Read RTCM bit
@@ -171,9 +172,7 @@ void constructor(void) {
 	}
 
 	// Enable centiseconds
-	//function = (function & ~REG_FUNCTION_100TH_mask) | REG_FUNCTION_100TH_ENABLED;
-
-	//write_register(REG_FUNCTION, function);
+	write_register(REG_FUNCTION, function | REG_FUNCTION_100TH_ENABLED);
 
 	// Enable nINTA output pin
 	write_register(REG_PIN_IO, REG_PIN_IO_INTAPM_INTA);
@@ -552,7 +551,6 @@ void set_stopwatch_alarm(const ComType com, const SetStopwatchAlarm *data) {
 
 void get_stopwatch_alarm(const ComType com, const GetStopwatchAlarm *data) {
 	BrickletAPI *ba = BA;
-	BrickContext *bc = BC;
 
 	if (data->alarm > 1) {
 		ba->com_return_error(data, sizeof(MessageHeader), MESSAGE_ERROR_CODE_INVALID_PARAMETER, com);
@@ -564,7 +562,7 @@ void get_stopwatch_alarm(const ComType com, const GetStopwatchAlarm *data) {
 	gsar.header        = data->header;
 	gsar.header.length = sizeof(gsar);
 
-	if (bc->mode == MODE_STOPWATCH) {
+	if (BC->mode == MODE_STOPWATCH) {
 		uint8_t bytes[5];
 
 		if (data->alarm == 1) {
