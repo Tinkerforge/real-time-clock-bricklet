@@ -101,19 +101,22 @@ void constructor(void) {
 
 	BA->bricklet_deselect(BS->port - 'a');
 
-	// Select offset calibration mode and 12.5pF oscillator load capacitance
-	uint8_t oscillator;
+	// Select offset calibration mode, 12.5pF oscillator load capacitance
+	uint8_t oscillator = REG_OSCILLATOR_CL_12PF;
 
 	if (BC->calibration[2] == CALIBRATION_MODE_LOW_POWER) {
-		oscillator = REG_OSCILLATOR_OFFM_LOW_POWER;
+		oscillator |= REG_OSCILLATOR_OFFM_LOW_POWER;
 	} else {
-		oscillator = REG_OSCILLATOR_OFFM_FAST_CONNECTION;
+		oscillator |= REG_OSCILLATOR_OFFM_FAST_CONNECTION;
 	}
 
-	write_register(REG_OSCILLATOR, oscillator | REG_OSCILLATOR_CL_12PF);
+	write_register(REG_OSCILLATOR, oscillator);
 
-	// Enable 100th second
-	write_register(REG_FUNCTION, REG_FUNCTION_100TH_ENABLED);
+	// Enable 100th second and set CLK pin frequency to 0Hz
+	write_register(REG_FUNCTION, REG_FUNCTION_100TH_ENABLED | REG_FUNCTION_COF_STATIC_LOW);
+
+	// Disable CLK pin
+	write_register(REG_PIN_IO, REG_PIN_IO_CLKPM_DISABLE);
 }
 
 void destructor(void) {
@@ -234,12 +237,12 @@ void set_calibration(const ComType com, const SetCalibration *data) {
 	BC->calibration[2] = data->mode;
 	BC->calibration[3] = data->offset;
 
-	uint8_t oscillator = REG_OSCILLATOR_CL_12PF;
+	uint8_t oscillator = read_register(REG_OSCILLATOR) & ~REG_OSCILLATOR_OFFM_mask;
 
 	if (BC->calibration[2] != CALIBRATION_MODE_LOW_POWER) {
-		oscillator |= REG_OSCILLATOR_OFFM_LOW_POWER;
+		oscillator = REG_OSCILLATOR_OFFM_LOW_POWER;
 	} else {
-		oscillator |= REG_OSCILLATOR_OFFM_FAST_CONNECTION;
+		oscillator = REG_OSCILLATOR_OFFM_FAST_CONNECTION;
 	}
 
 	write_register(REG_OSCILLATOR, oscillator);

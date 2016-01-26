@@ -196,6 +196,10 @@
 #define REG_OSCILLATOR_CL_6PF                     0b00000001
 #define REG_OSCILLATOR_CL_12PF                    0b00000010
 
+#define REG_PIN_IO_CLKPM_mask                     0b10000000
+#define REG_PIN_IO_CLKPM_ENABLED                  0b00000000
+#define REG_PIN_IO_CLKPM_DISABLE                  0b10000000
+
 #define REG_PIN_IO_INTAPM_mask                    0b00000011
 #define REG_PIN_IO_INTAPM_CLK                     0b00000000
 #define REG_PIN_IO_INTAPM_BATTERY_MODE            0b00000001
@@ -209,6 +213,16 @@
 #define REG_FUNCTION_RTCM_mask                    0b00010000
 #define REG_FUNCTION_RTCM_RTC                     0b00000000
 #define REG_FUNCTION_RTCM_STOPWATCH               0b00010000
+
+#define REG_FUNCTION_COF_mask                     0b00000111
+#define REG_FUNCTION_COF_32768HZ                  0b00000000
+#define REG_FUNCTION_COF_16384HZ                  0b00000001
+#define REG_FUNCTION_COF_8192HZ                   0b00000010
+#define REG_FUNCTION_COF_4096HZ                   0b00000011
+#define REG_FUNCTION_COF_2048HZ                   0b00000100
+#define REG_FUNCTION_COF_1024HZ                   0b00000101
+#define REG_FUNCTION_COF_1HZ                      0b00000110
+#define REG_FUNCTION_COF_STATIC_LOW               0b00000111
 
 #define REG_INTA_ENABLE_WATCHDOG                  0b00000001 // WDIEA
 #define REG_INTA_ENABLE_BATTERY_SWITCH            0b00000010 // BSIEA
