@@ -631,7 +631,8 @@ void get_countdown(const ComType com, const GetCountdown *data) {
 }
 
 void set_user_data(const ComType com, const SetUserData *data) {
-	write_register(REG_WATCHDOG, data->data);
+	BC->user_data = data->data;
+	write_register(REG_RAM_BYTE, data->data);
 }
 
 void get_user_data(const ComType com, const GetUserData *data) {
