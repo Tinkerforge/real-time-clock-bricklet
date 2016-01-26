@@ -32,75 +32,21 @@
 #define I2C_WRITE 0
 
 void invocation(const ComType com, const uint8_t *data) {
-	BrickletAPI *ba = BA;
-
 	switch(((MessageHeader*)data)->fid) {
-		case FID_SET_MODE:
-			set_mode(com, (SetMode*)data);
-			ba->com_return_setter(com, data);
+		case FID_SET_DATE_TIME:
+			set_date_time(com, (SetDateTime*)data);
 			return;
 
-		case FID_GET_MODE:
-			get_mode(com, (GetMode*)data);
+		case FID_GET_DATE_TIME:
+			get_date_time(com, (GetDateTime*)data);
 			return;
 
-		case FID_SET_RTC_DATE_TIME:
-			set_rtc_date_time(com, (SetRTCDateTime*)data);
-			ba->com_return_setter(com, data);
-			return;
-
-		case FID_GET_RTC_DATE_TIME:
-			get_rtc_date_time(com, (GetRTCDateTime*)data);
-			return;
-
-		case FID_SET_RTC_ALARM:
-			set_rtc_alarm(com, (SetRTCAlarm*)data);
-			ba->com_return_setter(com, data);
-			return;
-
-		case FID_GET_RTC_ALARM:
-			get_rtc_alarm(com, (GetRTCAlarm*)data);
-			return;
-
-		case FID_SET_STOPWATCH_TIME:
-			set_stopwatch_time(com, (SetStopwatchTime*)data);
-			ba->com_return_setter(com, data);
-			return;
-
-		case FID_GET_STOPWATCH_TIME:
-			get_stopwatch_time(com, (GetStopwatchTime*)data);
-			return;
-
-		case FID_SET_STOPWATCH_ALARM:
-			set_stopwatch_alarm(com, (SetStopwatchAlarm*)data);
-			ba->com_return_setter(com, data);
-			return;
-
-		case FID_GET_STOPWATCH_ALARM:
-			get_stopwatch_alarm(com, (GetStopwatchAlarm*)data);
-			return;
-
-		case FID_SET_COUNTDOWN:
-			set_countdown(com, (SetCountdown*)data);
-			ba->com_return_setter(com, data);
-			return;
-
-		case FID_GET_COUNTDOWN:
-			get_countdown(com, (GetCountdown*)data);
-			return;
-
-		case FID_SET_USER_DATA:
-			set_user_data(com, (SetUserData*)data);
-			ba->com_return_setter(com, data);
-			return;
-
-		case FID_GET_USER_DATA:
-			get_user_data(com, (GetUserData*)data);
+		case FID_GET_TIMESTAMP:
+			get_timestamp(com, (GetTimestamp*)data);
 			return;
 
 		case FID_SET_CALIBRATION:
 			set_calibration(com, (SetCalibration*)data);
-			ba->com_return_setter(com, data);
 			return;
 
 		case FID_GET_CALIBRATION:
@@ -108,20 +54,13 @@ void invocation(const ComType com, const uint8_t *data) {
 			return;
 
 		default:
-			ba->com_return_error(data, sizeof(MessageHeader), MESSAGE_ERROR_CODE_NOT_SUPPORTED, com);
+			BA->com_return_error(data, sizeof(MessageHeader), MESSAGE_ERROR_CODE_NOT_SUPPORTED, com);
 			return;
 	}
 }
 
 void constructor(void) {
-	BrickletAPI *ba = BA;
-	BrickContext *bc = BC;
-	const char port = BS->port - 'a';
-
 	_Static_assert(sizeof(BrickContext) <= BRICKLET_CONTEXT_MAX_SIZE, "BrickContext too big");
-
-	bc->flags = 0;
-	bc->user_data = read_register(REG_RAM_BYTE);
 
 	// Setting the interrupt pin as input
 	PIN_INT.pio->PIO_PUER = PIN_INT.mask;
@@ -129,43 +68,43 @@ void constructor(void) {
 	PIN_INT.pio->PIO_PER = PIN_INT.mask;
 
 	// Load calibration from EEPROM
-	ba->bricklet_select(port);
+	BA->bricklet_select(BS->port - 'a');
 
-	ba->i2c_eeprom_master_read(ba->twid->pTwi,
+	BA->i2c_eeprom_master_read(BA->twid->pTwi,
 	                           CALIBRATION_EEPROM_POSITION,
-	                           (char *)bc->calibration,
-	                           sizeof(bc->calibration));
+	                           (char *)BC->calibration,
+	                           sizeof(BC->calibration));
 
-	if (bc->calibration[0] == CALIBRATION_EEPROM_MAGIC0 &&
-	    bc->calibration[1] == CALIBRATION_EEPROM_MAGIC0) {
-		write_register(REG_OFFSET, bc->calibration[3]);
+	if (BC->calibration[0] == CALIBRATION_EEPROM_MAGIC0 &&
+	    BC->calibration[1] == CALIBRATION_EEPROM_MAGIC0) {
+		write_register(REG_OFFSET, BC->calibration[3]);
 	} else {
 		// EEPROM doesn't contain calibration, store current calibration
-		bc->calibration[0] = CALIBRATION_EEPROM_MAGIC0;
-		bc->calibration[1] = CALIBRATION_EEPROM_MAGIC1;
+		BC->calibration[0] = CALIBRATION_EEPROM_MAGIC0;
+		BC->calibration[1] = CALIBRATION_EEPROM_MAGIC1;
 
 		uint8_t offm = read_register(REG_OSCILLATOR) & REG_OSCILLATOR_OFFM_mask;
 
 		if (offm == REG_OSCILLATOR_OFFM_LOW_POWER) {
-			bc->calibration[2] = CALIBRATION_MODE_LOW_POWER;
+			BC->calibration[2] = CALIBRATION_MODE_LOW_POWER;
 		} else {
-			bc->calibration[2] = CALIBRATION_MODE_FAST_CORRECTION;
+			BC->calibration[2] = CALIBRATION_MODE_FAST_CORRECTION;
 		}
 
-		bc->calibration[3] = read_register(REG_OFFSET);
+		BC->calibration[3] = read_register(REG_OFFSET);
 
-		ba->i2c_eeprom_master_write(ba->twid->pTwi,
+		BA->i2c_eeprom_master_write(BA->twid->pTwi,
 		                            CALIBRATION_EEPROM_POSITION,
-		                            (const char*)bc->calibration,
-		                            sizeof(bc->calibration));
+		                            (const char*)BC->calibration,
+		                            sizeof(BC->calibration));
 	}
 
-	ba->bricklet_deselect(port);
+	BA->bricklet_deselect(BS->port - 'a');
 
 	// Select offset calibration mode and 12.5pF oscillator load capacitance
 	uint8_t oscillator;
 
-	if (bc->calibration[2] == CALIBRATION_MODE_LOW_POWER) {
+	if (BC->calibration[2] == CALIBRATION_MODE_LOW_POWER) {
 		oscillator = REG_OSCILLATOR_OFFM_LOW_POWER;
 	} else {
 		oscillator = REG_OSCILLATOR_OFFM_FAST_CONNECTION;
@@ -173,518 +112,156 @@ void constructor(void) {
 
 	write_register(REG_OSCILLATOR, oscillator | REG_OSCILLATOR_CL_12PF);
 
-	// Read RTCM bit
-	uint8_t function = read_register(REG_FUNCTION);
-
-	if ((function & REG_FUNCTION_RTCM_mask) == REG_FUNCTION_RTCM_RTC) {
-		bc->mode = MODE_RTC;
-	} else {
-		bc->mode = MODE_STOPWATCH;
-	}
-
-	// Enable centiseconds
-	write_register(REG_FUNCTION, function | REG_FUNCTION_100TH_ENABLED);
-
-	// Enable nINTA output pin
-	write_register(REG_PIN_IO, REG_PIN_IO_INTAPM_INTA);
-
-	// Enable nINTA interrupts
-	write_register(REG_INTA_ENABLE, REG_INTA_ENABLE_WATCHDOG | REG_INTA_ENABLE_ALARM1 |
-	                                REG_INTA_ENABLE_ALARM2 | REG_INTA_ENABLE_LEVEL_MODE);
+	// Enable 100th second
+	write_register(REG_FUNCTION, REG_FUNCTION_100TH_ENABLED);
 }
 
 void destructor(void) {
 }
 
 void tick(const uint8_t tick_type) {
-	BrickletAPI *ba = BA;
-	BrickContext *bc = BC;
-	const uint32_t uid = BS->uid;
-
-	if(tick_type & TICK_TASK_TYPE_CALCULATION) {
-		if(!(PIN_INT.pio->PIO_PDSR & PIN_INT.mask)) { // nINTA
-			bc->flags = read_register(REG_FLAGS);
-			write_register(REG_FLAGS, 0);
-		}
-	}
-
-	if(tick_type & TICK_TASK_TYPE_MESSAGE) {
-		if (bc->flags & (REG_FLAGS_ALARM1 | REG_FLAGS_ALARM2)) {
-			if (bc->mode == MODE_RTC) {
-				RTCAlarm ra;
-
-				ra.alarm = bc->flags & REG_FLAGS_ALARM1 ? 0 : 1;
-
-				ba->com_make_default_header(&ra, uid, sizeof(ra), FID_RTC_ALARM);
-				ba->send_blocking_with_timeout(&ra, sizeof(ra), *ba->com_current);
-			} else {
-				StopwatchAlarm swa;
-
-				swa.alarm = bc->flags & REG_FLAGS_ALARM1 ? 0 : 1;
-
-				ba->com_make_default_header(&swa, uid, sizeof(swa), FID_STOPWATCH_ALARM);
-				ba->send_blocking_with_timeout(&swa, sizeof(swa), *ba->com_current);
-			}
-		}
-
-		if (bc->flags & REG_FLAGS_WATCHDOG) {
-			Countdown c;
-
-			ba->com_make_default_header(&c, uid, sizeof(c), FID_COUNTDOWN);
-			ba->send_blocking_with_timeout(&c, sizeof(c), *ba->com_current);
-		}
-
-		bc->flags = 0;
-	}
 }
 
-void set_raw_clock(uint8_t *bytes, const uint8_t length) {
-	for (uint8_t i = 0; i < length; ++i) {
-		bytes[i] = bin2bcd(bytes[i]);
+void set_date_time(const ComType com, const SetDateTime *data) {
+	if (data->year < 2000 || data->year > 2099 ||
+	    data->month < 1 || data->month > 12 ||
+	    data->day < 1 || data->day > 31 ||
+	    data->hour > 23 ||
+	    data->minute > 59 ||
+	    data->second > 59 ||
+	    data->centisecond > 99 ||
+	    data->weekday < 1 || data->weekday > 7) {
+		BA->com_return_error(data, sizeof(MessageHeader), MESSAGE_ERROR_CODE_INVALID_PARAMETER, com);
+		return;
 	}
+
+	const uint8_t bytes[8] = {
+		bin2bcd(data->centisecond),
+		bin2bcd(data->second),
+		bin2bcd(data->minute),
+		bin2bcd(data->hour),
+		bin2bcd(data->day),
+		bin2bcd(data->weekday % 7), // Convert from [Mon..Sun] == [1..7] to  [Sun..Sat] == [0..6]
+		bin2bcd(data->month),
+		bin2bcd(data->year - 2000)
+	};
 
 	// Stop clock and clear prescaler
 	write_register(REG_STOP_ENABLE, REG_STOP_ENABLE_STOP_ENABLED);
 	write_register(REG_RESET, REG_RESET_CLEAR_PRESCALER);
 
 	// Set clock
-	write_registers(REG_RAW_CLOCK_100TH_SECOND, bytes, length);
+	write_registers(REG_RTC_TIME_100TH_SECOND, bytes, 8);
 
 	// Start clock
 	write_register(REG_STOP_ENABLE, REG_STOP_ENABLE_STOP_DISABLED);
+
+	BA->com_return_setter(com, data);
 }
 
-void get_raw_clock(uint8_t *bytes, const uint8_t length) {
-	read_registers(REG_RAW_CLOCK_100TH_SECOND, bytes, length);
+void get_date_time(const ComType com, const GetDateTime *data) {
+	GetDateTimeReturn gdtr;
+	uint8_t bytes[8];
 
-	bytes[1] &= 0b01111111; // remove OS bit
-	bytes[2] &= 0b01111111; // remove EMON bit
+	gdtr.header        = data->header;
+	gdtr.header.length = sizeof(gdtr);
 
-	for (uint8_t i = 0; i < length; ++i) {
-		bytes[i] = bcd2bin(bytes[i]);
+	read_registers(REG_RTC_TIME_100TH_SECOND, bytes, 8);
+
+	gdtr.year        = 2000 + bcd2bin(bytes[7]);
+	gdtr.month       = bcd2bin(bytes[6]);
+	gdtr.day         = bcd2bin(bytes[4]);
+	gdtr.hour        = bcd2bin(bytes[3]);
+	gdtr.minute      = bcd2bin(bytes[2] & 0b01111111); // remove EMON bit
+	gdtr.second      = bcd2bin(bytes[1] & 0b01111111); // remove OS bit
+	gdtr.centisecond = bcd2bin(bytes[0]);
+	gdtr.weekday     = bcd2bin(bytes[5]);
+
+	// Convert from [Sun..Sat] == [0..6] to [Mon..Sun] == [1..7]
+	if (gdtr.weekday == 0) {
+		gdtr.weekday = 7;
 	}
+
+	BA->send_blocking_with_timeout(&gdtr, sizeof(gdtr), com);
 }
 
-void set_raw_alarm(const uint8_t reg, uint8_t *bytes, const uint8_t length,
-                   const uint8_t enable_mask, const uint8_t enable_offset) {
-	// Clear alarm enable bits
-	uint8_t enable = read_register(REG_RAW_ALARM_ENABLE);
+static const uint16_t days_before_this_month_table[12] = {
+	0,
+	31,
+	31 + 28,
+	31 + 28 + 31,
+	31 + 28 + 31 + 30,
+	31 + 28 + 31 + 30 + 31,
+	31 + 28 + 31 + 30 + 31 + 30,
+	31 + 28 + 31 + 30 + 31 + 30 + 31,
+	31 + 28 + 31 + 30 + 31 + 30 + 31 + 31,
+	31 + 28 + 31 + 30 + 31 + 30 + 31 + 31 + 30,
+	31 + 28 + 31 + 30 + 31 + 30 + 31 + 31 + 30 + 31,
+	31 + 28 + 31 + 30 + 31 + 30 + 31 + 31 + 30 + 31 + 30
+};
 
-	enable &= ~enable_mask;
+void get_timestamp(const ComType com, const GetTimestamp *data) {
+	GetTimestampReturn gtr;
+	uint8_t bytes[8];
 
-	write_register(REG_RAW_ALARM_ENABLE, enable);
+	gtr.header        = data->header;
+	gtr.header.length = sizeof(gtr);
 
-	// Set alarm
-	for (uint8_t i = 0; i < length; ++i) {
-		if ((int8_t)bytes[i] >= 0) {
-			enable |= 1 << (enable_offset + i);
-			bytes[i] = bin2bcd(bytes[i]);
-		} else {
-			bytes[i] = 0;
-		}
-	}
+	read_registers(REG_RTC_TIME_100TH_SECOND, bytes, 8);
 
-	write_registers(reg, bytes, length);
+	uint8_t year        = bcd2bin(bytes[7]); // [0..99]
+	uint8_t month       = bcd2bin(bytes[6]); // [1..12]
+	uint8_t day         = bcd2bin(bytes[4]); // [1..31]
+	uint8_t hour        = bcd2bin(bytes[3]); // [0..23]
+	uint8_t minute      = bcd2bin(bytes[2] & 0b01111111); // [0..59], remove EMON bit
+	uint8_t second      = bcd2bin(bytes[1] & 0b01111111); // [0..59], remove OS bit
+	uint8_t centisecond = bcd2bin(bytes[0]); // [0..99]
 
-	// Set alarm enable bits
-	write_register(REG_RAW_ALARM_ENABLE, enable);
+	int64_t days_before_this_year  = year * 365 + (MAX((int8_t)year - 1, 0)) / 4 + (year > 0 ? 1 : 0);
+	int64_t days_before_this_month = days_before_this_month_table[month - 1] + (month > 2 && year % 4 == 0 ? 1 : 0);
+
+	gtr.milliseconds = (((((days_before_this_year + days_before_this_month + day - 1) * 24 + hour) * 60 + minute) * 60) + second) * 1000 + centisecond * 10;
+
+	BA->send_blocking_with_timeout(&gtr, sizeof(gtr), com);
 }
 
-void get_raw_alarm(const uint8_t reg, uint8_t *bytes, const uint8_t length,
-                   const uint8_t enable_offset) {
-	const uint8_t enable = read_register(REG_RAW_ALARM_ENABLE);
-
-	read_registers(reg, bytes, length);
-
-	for (uint8_t i = 0; i < length; ++i) {
-		if (enable & (1 << (enable_offset + i))) {
-			bytes[i] = bcd2bin(bytes[i]);
-		} else {
-			bytes[i] = -1;
-		}
-	}
-}
-
-void set_mode(const ComType com, const SetMode *data) {
-	BrickletAPI *ba = BA;
-	BrickContext *bc = BC;
-
-	if(data->mode > MODE_STOPWATCH) {
-		ba->com_return_error(data, sizeof(MessageHeader), MESSAGE_ERROR_CODE_INVALID_PARAMETER, com);
-		return;
-	}
-
-	if (bc->mode == data->mode) {
-		return;
-	}
-
-	bc->mode = data->mode;
-
-	// Stop clock and clear prescaler
-	write_register(REG_STOP_ENABLE, REG_STOP_ENABLE_STOP_ENABLED);
-	write_register(REG_RESET, REG_RESET_CLEAR_PRESCALER);
-
-	// Reset clock and clear alarms
-	uint8_t bytes[17] = {0};
-
-	if (bc->mode == MODE_RTC) {
-		bytes[4] = 1;
-		bytes[5] = 6;
-		bytes[6] = 1;
-	}
-
-	write_registers(REG_RAW_CLOCK_100TH_SECOND, bytes, 17);
-
-	// Clear alarm flags
-	uint8_t flags = read_register(REG_FLAGS);
-
-	flags &= ~REG_FLAGS_ALARM1;
-	flags &= ~REG_FLAGS_ALARM2;
-
-	write_register(REG_FLAGS, flags);
-
-	bc->flags = flags;
-
-	// Switch clock mode
-	uint8_t function = read_register(REG_FUNCTION);
-
-	function &= ~REG_FUNCTION_RTCM_mask;
-
-	if (bc->mode == MODE_RTC) {
-		function |= REG_FUNCTION_RTCM_RTC;
-	} else if (bc->mode == MODE_STOPWATCH) {
-		function |= REG_FUNCTION_RTCM_STOPWATCH;
-	}
-
-	write_register(REG_FUNCTION, function);
-
-	// Start clock
-	write_register(REG_STOP_ENABLE, REG_STOP_ENABLE_STOP_DISABLED);
-}
-
-void get_mode(const ComType com, const GetMode *data) {
-	GetModeReturn gmr;
-
-	gmr.header        = data->header;
-	gmr.header.length = sizeof(gmr);
-	gmr.mode          = BC->mode;
-
-	BA->send_blocking_with_timeout(&gmr, sizeof(gmr), com);
-}
-
-void set_rtc_date_time(const ComType com, const SetRTCDateTime *data) {
-	if (BC->mode == MODE_RTC) {
-		// FIXME: validate input values
-
-		uint8_t bytes[8] = {
-			data->centisecond,
-			data->second,
-			data->minute,
-			data->hour,
-			data->day,
-			data->weekday,
-			data->month,
-			data->year - 2000
-		};
-
-		set_raw_clock(bytes, 8);
-	}
-}
-
-void get_rtc_date_time(const ComType com, const GetRTCDateTime *data) {
-	GetRTCDateTimeReturn grdtr = {{0}};
-
-	grdtr.header        = data->header;
-	grdtr.header.length = sizeof(grdtr);
-
-	if (BC->mode == MODE_RTC) {
-		uint8_t bytes[8];
-
-		get_raw_clock(bytes, 8);
-
-		grdtr.year        = 2000 + bytes[7];
-		grdtr.month       = bytes[6];
-		grdtr.day         = bytes[4];
-		grdtr.hour        = bytes[3];
-		grdtr.minute      = bytes[2];
-		grdtr.second      = bytes[1];
-		grdtr.centisecond = bytes[0];
-		grdtr.weekday     = bytes[5];
-	}
-
-	BA->send_blocking_with_timeout(&grdtr, sizeof(grdtr), com);
-}
-
-void set_rtc_alarm(const ComType com, const SetRTCAlarm *data) {
-	if (data->alarm > 1) {
+void set_calibration(const ComType com, const SetCalibration *data) {
+	if (data->mode > CALIBRATION_MODE_FAST_CORRECTION) {
 		BA->com_return_error(data, sizeof(MessageHeader), MESSAGE_ERROR_CODE_INVALID_PARAMETER, com);
 		return;
 	}
 
-	if (BC->mode == MODE_RTC) {
-		// FIXME: validate input values
-
-		if (data->alarm == 0) {
-			uint8_t bytes[5] = {
-				data->second,
-				data->minute,
-				data->hour,
-				data->day,
-				data->month
-			};
-
-			set_raw_alarm(REG_RTC_ALARM1_SECOND, bytes, 5, REG_RTC_ALARM_ENABLE_A1E_mask, 0);
-		} else {
-			uint8_t bytes[3] = {
-				data->minute,
-				data->hour,
-				data->weekday
-			};
-
-			set_raw_alarm(REG_RTC_ALARM2_MINUTE, bytes, 3, REG_RTC_ALARM_ENABLE_A2E_mask, 5);
-		}
-	}
-}
-
-void get_rtc_alarm(const ComType com, const GetRTCAlarm *data) {
-	BrickletAPI *ba = BA;
-
-	if (data->alarm > 1) {
-		ba->com_return_error(data, sizeof(MessageHeader), MESSAGE_ERROR_CODE_INVALID_PARAMETER, com);
-		return;
-	}
-
-	GetRTCAlarmReturn grar = {{-1}};
-
-	grar.header        = data->header;
-	grar.header.length = sizeof(grar);
-
-	if (BC->mode == MODE_RTC) {
-		uint8_t bytes[5];
-
-		if (data->alarm == 0) {
-			get_raw_alarm(REG_RTC_ALARM1_SECOND, bytes, 5, 0);
-
-			grar.month  = bytes[4];
-			grar.day    = bytes[3];
-			grar.hour   = bytes[2];
-			grar.minute = bytes[1];
-			grar.second = bytes[0];
-		} else {
-			get_raw_alarm(REG_RTC_ALARM2_MINUTE, bytes, 3, 5);
-
-			grar.weekday = bytes[2];
-			grar.hour    = bytes[1];
-			grar.minute  = bytes[0];
-		}
-	}
-
-	ba->send_blocking_with_timeout(&grar, sizeof(grar), com);
-}
-
-void set_stopwatch_time(const ComType com, const SetStopwatchTime *data) {
-	if (BC->mode == MODE_STOPWATCH) {
-		// FIXME: validate input values
-
-		uint8_t bytes[6] = {
-			data->centisecond,
-			data->second,
-			data->minute,
-			data->hour % 100,
-			(data->hour / 100) % 100,
-			(data->hour / 10000) % 100,
-		};
-
-		set_raw_clock(bytes, 6);
-	}
-}
-
-void get_stopwatch_time(const ComType com, const GetStopwatchTime *data) {
-	GetStopwatchTimeReturn gstr = {{0}};
-
-	gstr.header        = data->header;
-	gstr.header.length = sizeof(gstr);
-
-	if (BC->mode == MODE_STOPWATCH) {
-		uint8_t bytes[6];
-
-		get_raw_clock(bytes, 6);
-
-		gstr.hour        = bytes[5] * 10000 + bytes[4] * 100 + bytes[3];
-		gstr.minute      = bytes[2];
-		gstr.second      = bytes[1];
-		gstr.centisecond = bytes[0];
-	}
-
-	BA->send_blocking_with_timeout(&gstr, sizeof(gstr), com);
-}
-
-void set_stopwatch_alarm(const ComType com, const SetStopwatchAlarm *data) {
-	BrickletAPI *ba = BA;
-
-	if (data->alarm > 1) {
-		ba->com_return_error(data, sizeof(MessageHeader), MESSAGE_ERROR_CODE_INVALID_PARAMETER, com);
-		return;
-	}
-
-	if (BC->mode == MODE_STOPWATCH) {
-		// FIXME: validate input values
-
-		const int32_t hour = data->hour;
-		const uint8_t hour1 = hour % 100;
-		const uint8_t hour2 = (hour / 100) % 100;
-		const uint8_t hour3 = (hour / 10000) % 100;
-		uint8_t bytes[5] = {-1};
-
-		if (data->alarm == 0) {
-			bytes[0] = data->second;
-			bytes[1] = data->minute;
-
-			if (hour >= 0) {
-				bytes[2] = hour1;
-				bytes[3] = hour2;
-				bytes[4] = hour3;
-			}
-
-			set_raw_alarm(REG_STOPWATCH_ALARM1_SECOND, bytes, 5, REG_STOPWATCH_ALARM_ENABLE_A1E_mask, 0);
-		} else {
-			bytes[0] = data->minute;
-
-			if (hour >= 0) {
-				bytes[1] = hour1;
-				bytes[2] = hour2;
-			}
-
-			set_raw_alarm(REG_STOPWATCH_ALARM2_MINUTE, bytes, 3, REG_STOPWATCH_ALARM_ENABLE_A2E_mask, 5);
-		}
-	}
-}
-
-void get_stopwatch_alarm(const ComType com, const GetStopwatchAlarm *data) {
-	BrickletAPI *ba = BA;
-
-	if (data->alarm > 1) {
-		ba->com_return_error(data, sizeof(MessageHeader), MESSAGE_ERROR_CODE_INVALID_PARAMETER, com);
-		return;
-	}
-
-	GetStopwatchAlarmReturn gsar = {{-1}};
-
-	gsar.header        = data->header;
-	gsar.header.length = sizeof(gsar);
-
-	if (BC->mode == MODE_STOPWATCH) {
-		uint8_t bytes[5];
-
-		if (data->alarm == 1) {
-			get_raw_alarm(REG_STOPWATCH_ALARM1_SECOND, bytes, 5, 0);
-
-			if ((int8_t)bytes[4] < 0) {
-				gsar.hour = -1;
-			} else {
-				gsar.hour = bytes[4] * 10000 + bytes[3] * 100 + bytes[2];
-			}
-
-			gsar.minute = bytes[1];
-			gsar.second = bytes[0];
-		} else {
-			get_raw_alarm(REG_STOPWATCH_ALARM2_MINUTE, bytes, 3, 5);
-
-			if ((int8_t)bytes[2] < 0) {
-				gsar.hour = -1;
-			} else {
-				gsar.hour = bytes[2] * 100 + bytes[1];
-			}
-
-			gsar.minute = bytes[0];
-		}
-	}
-
-	ba->send_blocking_with_timeout(&gsar, sizeof(gsar), com);
-}
-
-void set_countdown(const ComType com, const SetCountdown *data) {
-	// FIXME: validate input values
-
-	uint8_t watchdog = 0;
-
-	watchdog |= (data->mode    << REG_WATCHDOG_MODE_offset)    & REG_WATCHDOG_MODE_mask;
-	watchdog |= (data->counter << REG_WATCHDOG_COUNTER_offset) & REG_WATCHDOG_COUNTER_mask;
-	watchdog |= (data->step    << REG_WATCHDOG_STEP_offset)    & REG_WATCHDOG_STEP_mask;
-
-	write_register(REG_WATCHDOG, watchdog);
-}
-
-void get_countdown(const ComType com, const GetCountdown *data) {
-	GetCountdownReturn gcr;
-
-	gcr.header        = data->header;
-	gcr.header.length = sizeof(gcr);
-
-	uint8_t watchdog = read_register(REG_WATCHDOG);
-
-	gcr.mode    = (watchdog & REG_WATCHDOG_MODE_mask)    >> REG_WATCHDOG_MODE_offset;
-	gcr.counter = (watchdog & REG_WATCHDOG_COUNTER_mask) >> REG_WATCHDOG_COUNTER_offset;
-	gcr.step    = (watchdog & REG_WATCHDOG_STEP_mask)    >> REG_WATCHDOG_STEP_offset;
-
-	BA->send_blocking_with_timeout(&gcr, sizeof(gcr), com);
-}
-
-void set_user_data(const ComType com, const SetUserData *data) {
-	BC->user_data = data->data;
-	write_register(REG_RAM_BYTE, data->data);
-}
-
-void get_user_data(const ComType com, const GetUserData *data) {
-	GetUserDataReturn gudr;
-
-	gudr.header        = data->header;
-	gudr.header.length = sizeof(gudr);
-	gudr.data          = BC->user_data;
-
-	BA->send_blocking_with_timeout(&gudr, sizeof(gudr), com);
-}
-
-void set_calibration(const ComType com, const SetCalibration *data) {
-	BrickletAPI *ba = BA;
-	BrickContext *bc = BC;
-	const char port = BS->port - 'a';
-
-	if (data->mode > CALIBRATION_MODE_FAST_CORRECTION) {
-		ba->com_return_error(data, sizeof(MessageHeader), MESSAGE_ERROR_CODE_INVALID_PARAMETER, com);
-		return;
-	}
-
-	bc->calibration[2] = data->mode;
-	bc->calibration[3] = data->offset;
+	BC->calibration[2] = data->mode;
+	BC->calibration[3] = data->offset;
 
 	uint8_t oscillator = REG_OSCILLATOR_CL_12PF;
 
-	if (bc->calibration[2] != CALIBRATION_MODE_LOW_POWER) {
+	if (BC->calibration[2] != CALIBRATION_MODE_LOW_POWER) {
 		oscillator |= REG_OSCILLATOR_OFFM_LOW_POWER;
 	} else {
 		oscillator |= REG_OSCILLATOR_OFFM_FAST_CONNECTION;
 	}
 
 	write_register(REG_OSCILLATOR, oscillator);
-	write_register(REG_OFFSET, bc->calibration[3]);
+	write_register(REG_OFFSET, BC->calibration[3]);
 
-	ba->bricklet_select(port);
-	ba->i2c_eeprom_master_write(ba->twid->pTwi,
+	BA->bricklet_select(BS->port - 'a');
+	BA->i2c_eeprom_master_write(BA->twid->pTwi,
 	                            CALIBRATION_EEPROM_POSITION,
-	                            (const char*)bc->calibration,
-	                            sizeof(bc->calibration));
-	ba->bricklet_deselect(port);
+	                            (const char*)BC->calibration,
+	                            sizeof(BC->calibration));
+	BA->bricklet_deselect(BS->port - 'a');
+
+	BA->com_return_setter(com, data);
 }
 
 void get_calibration(const ComType com, const GetCalibration *data) {
-	BrickContext *bc = BC;
 	GetCalibrationReturn gcr;
 
 	gcr.header        = data->header;
 	gcr.header.length = sizeof(gcr);
-	gcr.mode          = bc->calibration[2];
-	gcr.offset        = bc->calibration[3];
+	gcr.mode          = BC->calibration[2];
+	gcr.offset        = BC->calibration[3];
 
 	BA->send_blocking_with_timeout(&gcr, sizeof(gcr), com);
 }
@@ -719,7 +296,7 @@ void read_registers(const uint8_t reg, uint8_t *data, const uint8_t length) {
 	i2c_stop();
 }
 
-void write_register(const uint8_t reg, uint8_t value) {
+void write_register(const uint8_t reg, const uint8_t value) {
 	i2c_start();
 	i2c_send_byte((I2C_ADDRESS << 1) | I2C_WRITE);
 	i2c_send_byte(reg);
@@ -727,7 +304,7 @@ void write_register(const uint8_t reg, uint8_t value) {
 	i2c_stop();
 }
 
-void write_registers(const uint8_t reg, uint8_t *data, const uint8_t length) {
+void write_registers(const uint8_t reg, const uint8_t *data, const uint8_t length) {
 	i2c_start();
 	i2c_send_byte((I2C_ADDRESS << 1) | I2C_WRITE);
 	i2c_send_byte(reg);

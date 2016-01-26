@@ -48,22 +48,8 @@
 //#define DEBUG_BRICKLET 1
 #define BOARD_MCK 64000000
 
-#define MODE_RTC                                  0
-#define MODE_STOPWATCH                            1
-
-#define COUNTDOWN_MODE_ONCE                       0
-#define COUNTDOWN_MODE_REPEAT                     1
-
-#define COUNTDOWN_STEP_4000MS                     0
-#define COUNTDOWN_STEP_1000MS                     1
-#define COUNTDOWN_STEP_250MS                      2
-#define COUNTDOWN_STEP_62MS                       3
-
 #define CALIBRATION_MODE_LOW_POWER                0
 #define CALIBRATION_MODE_FAST_CORRECTION          1
-
-#define REG_RAW_CLOCK_100TH_SECOND                0x00
-#define REG_RAW_ALARM_ENABLE                      0x10
 
 // RTC Time and Date
 #define REG_RTC_TIME_100TH_SECOND                 0x00
