@@ -73,7 +73,7 @@ typedef struct {
 
 typedef struct {
 	MessageHeader header;
-	int64_t milliseconds;
+	int64_t timestamp;
 } __attribute__((__packed__)) GetTimestampReturn;
 
 typedef struct {

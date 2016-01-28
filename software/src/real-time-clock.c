@@ -214,7 +214,7 @@ void get_timestamp(const ComType com, const GetTimestamp *data) {
 	int64_t days_before_this_year  = year * 365 + (MAX((int8_t)year - 1, 0)) / 4 + (year > 0 ? 1 : 0);
 	int64_t days_before_this_month = days_before_this_month_table[month - 1] + (month > 2 && year % 4 == 0 ? 1 : 0);
 
-	gtr.milliseconds = (((((days_before_this_year + days_before_this_month + day - 1) * 24 + hour) * 60 + minute) * 60) + second) * 1000 + centisecond * 10;
+	gtr.timestamp = (((((days_before_this_year + days_before_this_month + day - 1) * 24 + hour) * 60 + minute) * 60) + second) * 1000 + centisecond * 10;
 
 	BA->send_blocking_with_timeout(&gtr, sizeof(gtr), com);
 }
