@@ -1,0 +1,33 @@
+Needs["NETLink`"]
+LoadNETAssembly["Tinkerforge",NotebookDirectory[]<>"../../.."]
+
+host="localhost"
+port=4223
+uid="XYZ"(*Change to your UID*)
+
+(*Create IPConnection and device object*)
+ipcon=NETNew["Tinkerforge.IPConnection"]
+rtc=NETNew["Tinkerforge.BrickletRealTimeClock",uid,ipcon]
+ipcon@Connect[host,port]
+
+year=0;month=0;day=0;hour=0;minute=0;second=0;centisecond=0;weekday=0
+
+(*Get current date and time*)
+rtc@GetDateTime[year,month,day,hour,minute,second,centisecond,weekday]
+
+Print["Year: "<>ToString[year]]
+Print["Month: "<>ToString[month]]
+Print["Day: "<>ToString[day]]
+Print["Hour: "<>ToString[hour]]
+Print["Minute: "<>ToString[minute]]
+Print["Second: "<>ToString[second]]
+Print["Centisecond: "<>ToString[centisecond]]
+Print["Weekday: "<>ToString[weekday]]
+
+(*Get current timestamp (unit is ms)*)
+Print["Timestamp: "<>ToString[N[Quantity[rtc@GetTimestamp[],"ms"]]]]
+
+(*Clean up*)
+ipcon@Disconnect[]
+ReleaseNETObject[rtc]
+ReleaseNETObject[ipcon]
