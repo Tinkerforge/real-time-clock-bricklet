@@ -26,14 +26,14 @@
 #include "bricklib/com/com_common.h"
 
 #define CALIBRATION_EEPROM_POSITION (BRICKLET_PLUGIN_MAX_SIZE + 96)
-#define CALIBRATION_EEPROM_MAGIC0   0b10101010
-#define CALIBRATION_EEPROM_MAGIC1   0b00110011
+#define CALIBRATION_EEPROM_MAGIC0   0b00110011
+#define CALIBRATION_EEPROM_MAGIC1   0b10101010
 
 #define FID_SET_DATE_TIME 1
 #define FID_GET_DATE_TIME 2
 #define FID_GET_TIMESTAMP 3
-#define FID_SET_CALIBRATION 4
-#define FID_GET_CALIBRATION 5
+#define FID_SET_OFFSET 4
+#define FID_GET_OFFSET 5
 
 typedef struct {
 	MessageHeader header;
@@ -78,19 +78,17 @@ typedef struct {
 
 typedef struct {
 	MessageHeader header;
-	uint8_t mode;
 	int8_t offset;
-} __attribute__((__packed__)) SetCalibration;
+} __attribute__((__packed__)) SetOffset;
 
 typedef struct {
 	MessageHeader header;
-} __attribute__((__packed__)) GetCalibration;
+} __attribute__((__packed__)) GetOffset;
 
 typedef struct {
 	MessageHeader header;
-	uint8_t mode;
 	int8_t offset;
-} __attribute__((__packed__)) GetCalibrationReturn;
+} __attribute__((__packed__)) GetOffsetReturn;
 
 void invocation(const ComType com, const uint8_t *data);
 void constructor(void);
@@ -102,8 +100,8 @@ void get_date_time(const ComType com, const GetDateTime *data);
 
 void get_timestamp(const ComType com, const GetTimestamp *data);
 
-void set_calibration(const ComType com, const SetCalibration *data);
-void get_calibration(const ComType com, const GetCalibration *data);
+void set_offset(const ComType com, const SetOffset *data);
+void get_offset(const ComType com, const GetOffset *data);
 
 uint8_t read_register(const uint8_t reg);
 void read_registers(const uint8_t reg, uint8_t *data, const uint8_t length);

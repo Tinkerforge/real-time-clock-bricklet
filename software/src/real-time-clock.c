@@ -45,12 +45,12 @@ void invocation(const ComType com, const uint8_t *data) {
 			get_timestamp(com, (GetTimestamp*)data);
 			return;
 
-		case FID_SET_CALIBRATION:
-			set_calibration(com, (SetCalibration*)data);
+		case FID_SET_OFFSET:
+			set_offset(com, (SetOffset*)data);
 			return;
 
-		case FID_GET_CALIBRATION:
-			get_calibration(com, (GetCalibration*)data);
+		case FID_GET_OFFSET:
+			get_offset(com, (GetOffset*)data);
 			return;
 
 		default:
@@ -82,16 +82,7 @@ void constructor(void) {
 		// EEPROM doesn't contain calibration, store current calibration
 		BC->calibration[0] = CALIBRATION_EEPROM_MAGIC0;
 		BC->calibration[1] = CALIBRATION_EEPROM_MAGIC1;
-
-		uint8_t offm = read_register(REG_OSCILLATOR) & REG_OSCILLATOR_OFFM_mask;
-
-		if (offm == REG_OSCILLATOR_OFFM_LOW_POWER) {
-			BC->calibration[2] = CALIBRATION_MODE_LOW_POWER;
-		} else {
-			BC->calibration[2] = CALIBRATION_MODE_FAST_CORRECTION;
-		}
-
-		BC->calibration[3] = read_register(REG_OFFSET);
+		BC->calibration[2] = read_register(REG_OFFSET);
 
 		BA->i2c_eeprom_master_write(BA->twid->pTwi,
 		                            CALIBRATION_EEPROM_POSITION,
@@ -228,25 +219,10 @@ void get_timestamp(const ComType com, const GetTimestamp *data) {
 	BA->send_blocking_with_timeout(&gtr, sizeof(gtr), com);
 }
 
-void set_calibration(const ComType com, const SetCalibration *data) {
-	if (data->mode > CALIBRATION_MODE_FAST_CORRECTION) {
-		BA->com_return_error(data, sizeof(MessageHeader), MESSAGE_ERROR_CODE_INVALID_PARAMETER, com);
-		return;
-	}
+void set_offset(const ComType com, const SetOffset *data) {
+	BC->calibration[2] = data->offset;
 
-	BC->calibration[2] = data->mode;
-	BC->calibration[3] = data->offset;
-
-	uint8_t oscillator = read_register(REG_OSCILLATOR) & ~REG_OSCILLATOR_OFFM_mask;
-
-	if (BC->calibration[2] != CALIBRATION_MODE_LOW_POWER) {
-		oscillator = REG_OSCILLATOR_OFFM_LOW_POWER;
-	} else {
-		oscillator = REG_OSCILLATOR_OFFM_FAST_CONNECTION;
-	}
-
-	write_register(REG_OSCILLATOR, oscillator);
-	write_register(REG_OFFSET, BC->calibration[3]);
+	write_register(REG_OFFSET, BC->calibration[2]);
 
 	BA->bricklet_select(BS->port - 'a');
 	BA->i2c_eeprom_master_write(BA->twid->pTwi,
@@ -258,15 +234,14 @@ void set_calibration(const ComType com, const SetCalibration *data) {
 	BA->com_return_setter(com, data);
 }
 
-void get_calibration(const ComType com, const GetCalibration *data) {
-	GetCalibrationReturn gcr;
+void get_offset(const ComType com, const GetOffset *data) {
+	GetOffsetReturn gor;
 
-	gcr.header        = data->header;
-	gcr.header.length = sizeof(gcr);
-	gcr.mode          = BC->calibration[2];
-	gcr.offset        = BC->calibration[3];
+	gor.header        = data->header;
+	gor.header.length = sizeof(gor);
+	gor.offset        = BC->calibration[2];
 
-	BA->send_blocking_with_timeout(&gcr, sizeof(gcr), com);
+	BA->send_blocking_with_timeout(&gor, sizeof(gor), com);
 }
 
 uint8_t read_register(const uint8_t reg) {
