@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <inttypes.h>
 
 #include "ip_connection.h"
 #include "bricklet_real_time_clock.h"
@@ -46,7 +47,7 @@ int main(void) {
 		return 1;
 	}
 
-	printf("Timestamp: %lld ms\n", (long long)timestamp);
+	printf("Timestamp: %"PRId64" ms\n", timestamp);
 
 	printf("Press key to exit\n");
 	getchar();
