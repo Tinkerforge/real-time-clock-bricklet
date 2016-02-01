@@ -3,12 +3,12 @@
   (general
     (links 33)
     (no_connects 0)
-    (area 125.109499 87.909499 150.490501 113.290501)
+    (area 124.445139 87.245139 282.895869 162.490743)
     (thickness 1.6002)
     (drawings 11)
     (tracks 123)
     (zones 0)
-    (modules 16)
+    (modules 19)
     (nets 16)
   )
 
@@ -78,7 +78,7 @@
     (aux_axis_origin 125.30074 118.09984)
     (visible_elements FFFFFF9F)
     (pcbplotparams
-      (layerselection 0x010f8_80000001)
+      (layerselection 0x010c8_00000001)
       (usegerberextensions true)
       (excludeedgelayer true)
       (linewidth 0.150000)
@@ -101,7 +101,7 @@
       (mirror false)
       (drillshape 0)
       (scaleselection 1)
-      (outputdirectory best/))
+      (outputdirectory prod/))
   )
 
   (net 0 "")
@@ -6458,6 +6458,48 @@
       (net 11 "Net-(BT1-Pad1)"))
     (pad 2 smd rect (at 0 0 90) (size 3.96 3.96) (layers Vorderseite F.Mask)
       (net 1 GND))
+  )
+
+  (module kicad-libraries:Fiducial_Mark (layer Vorderseite) (tedit 560531B0) (tstamp 56AF7796)
+    (at 144.8 107.6)
+    (attr smd)
+    (fp_text reference Fiducial_Mark (at 0 0) (layer F.SilkS) hide
+      (effects (font (size 0.127 0.127) (thickness 0.03302)))
+    )
+    (fp_text value VAL** (at 0 -0.29972) (layer F.SilkS) hide
+      (effects (font (size 0.127 0.127) (thickness 0.03302)))
+    )
+    (fp_circle (center 0 0) (end 1.15062 0) (layer Dwgs.User) (width 0.01016))
+    (pad 1 smd circle (at 0 0) (size 1.00076 1.00076) (layers Vorderseite F.Paste F.Mask)
+      (clearance 0.65024))
+  )
+
+  (module kicad-libraries:Fiducial_Mark (layer Vorderseite) (tedit 560531B0) (tstamp 56AF77B7)
+    (at 131.8 89.6)
+    (attr smd)
+    (fp_text reference Fiducial_Mark (at 0 0) (layer F.SilkS) hide
+      (effects (font (size 0.127 0.127) (thickness 0.03302)))
+    )
+    (fp_text value VAL** (at 0 -0.29972) (layer F.SilkS) hide
+      (effects (font (size 0.127 0.127) (thickness 0.03302)))
+    )
+    (fp_circle (center 0 0) (end 1.15062 0) (layer Dwgs.User) (width 0.01016))
+    (pad 1 smd circle (at 0 0) (size 1.00076 1.00076) (layers Vorderseite F.Paste F.Mask)
+      (clearance 0.65024))
+  )
+
+  (module kicad-libraries:Fiducial_Mark (layer Vorderseite) (tedit 560531B0) (tstamp 56AF77D4)
+    (at 131.3 109.1)
+    (attr smd)
+    (fp_text reference Fiducial_Mark (at 0 0) (layer F.SilkS) hide
+      (effects (font (size 0.127 0.127) (thickness 0.03302)))
+    )
+    (fp_text value VAL** (at 0 -0.29972) (layer F.SilkS) hide
+      (effects (font (size 0.127 0.127) (thickness 0.03302)))
+    )
+    (fp_circle (center 0 0) (end 1.15062 0) (layer Dwgs.User) (width 0.01016))
+    (pad 1 smd circle (at 0 0) (size 1.00076 1.00076) (layers Vorderseite F.Paste F.Mask)
+      (clearance 0.65024))
   )
 
   (gr_line (start 150.3 110.6) (end 150.3 90.6) (angle 90) (layer Edge.Cuts) (width 0.381))
