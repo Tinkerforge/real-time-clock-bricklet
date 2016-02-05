@@ -186,6 +186,10 @@
 #define REG_OSCILLATOR_1224_24                    0b00000000
 #define REG_OSCILLATOR_1224_12                    0b00100000
 
+#define REG_OSCILLATOR_LOWJ_mask                  0b00010000
+#define REG_OSCILLATOR_LOWJ_DISABLED              0b00000000
+#define REG_OSCILLATOR_LOWJ_ENABLED               0b00010000
+
 #define REG_OSCILLATOR_OSCD_mask                  0b00001100
 #define REG_OSCILLATOR_OSCD_NORMAL                0b00000000
 #define REG_OSCILLATOR_OSCD_LOW                   0b00000100
@@ -266,10 +270,7 @@
 #define REG_RESET_CLEAR_TIMESTAMP                 0b00100101 // CTS
 
 typedef struct {
-	uint8_t mode;
-	uint8_t flags;
-	uint8_t user_data;
-	uint8_t calibration[4]; // magic0, magic1, mode, offset
+	uint8_t calibration[3]; // magic0, magic1, offset
 } BrickContext;
 
 #endif
