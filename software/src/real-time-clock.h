@@ -107,7 +107,7 @@ uint8_t read_register(const uint8_t reg);
 void read_registers(const uint8_t reg, uint8_t *data, const uint8_t length);
 void write_register(const uint8_t reg, const uint8_t value);
 void write_registers(const uint8_t reg, const uint8_t *data, const uint8_t length);
-void i2c_foobar(bool high);
+
 bool i2c_scl_value(void);
 void i2c_scl_high(void);
 void i2c_scl_low(void);

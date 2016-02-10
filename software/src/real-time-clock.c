@@ -135,7 +135,7 @@ void set_date_time(const ComType com, const SetDateTime *data) {
 		bin2bcd(data->minute),
 		bin2bcd(data->hour),
 		bin2bcd(data->day),
-		bin2bcd(data->weekday % 7), // Convert from [Mon..Sun] == [1..7] to  [Sun..Sat] == [0..6]
+		bin2bcd(data->weekday % 7), // Convert from [Mon..Sun] == [1..7] to [Sun..Sat] == [0..6]
 		bin2bcd(data->month),
 		bin2bcd(data->year - 2000)
 	};
@@ -294,20 +294,6 @@ void write_registers(const uint8_t reg, const uint8_t *data, const uint8_t lengt
 	i2c_stop();
 }
 
-void i2c_foobar(bool high) {
-	i2c_scl_low();
-
-	if (high) {
-		i2c_sda_high();
-	} else {
-		i2c_sda_low();
-	}
-
-	i2c_sleep_halfclock();
-	i2c_scl_high();
-	i2c_sleep_halfclock();
-}
-
 bool i2c_scl_value(void) {
 	return PIN_SCL.pio->PIO_PDSR & PIN_SCL.mask;
 }
@@ -371,7 +357,6 @@ uint8_t i2c_recv_byte(bool ack) {
 	}
 
 	// ACK
-#if 0
 	i2c_scl_low();
 
 	if(ack) {
@@ -383,16 +368,12 @@ uint8_t i2c_recv_byte(bool ack) {
 	i2c_sleep_halfclock();
 	i2c_scl_high();
 	i2c_sleep_halfclock();
-#else
-	i2c_foobar(!ack);
-#endif
 
 	return value;
 }
 
 bool i2c_send_byte(const uint8_t value) {
 	for(int8_t i = 7; i >= 0; i--) {
-#if 0
 		i2c_scl_low();
 
 		if((value >> i) & 1) {
@@ -404,9 +385,6 @@ bool i2c_send_byte(const uint8_t value) {
 		i2c_sleep_halfclock();
 		i2c_scl_high();
 		i2c_sleep_halfclock();
-#else
-		i2c_foobar((value >> i) & 1);
-#endif
 	}
 
 	// Wait for ACK
