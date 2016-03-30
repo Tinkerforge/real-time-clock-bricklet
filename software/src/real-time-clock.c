@@ -76,8 +76,8 @@ void constructor(void) {
 	                           sizeof(BC->calibration));
 
 	if (BC->calibration[0] == CALIBRATION_EEPROM_MAGIC0 &&
-	    BC->calibration[1] == CALIBRATION_EEPROM_MAGIC0) {
-		write_register(REG_OFFSET, BC->calibration[3]);
+	    BC->calibration[1] == CALIBRATION_EEPROM_MAGIC1) {
+		write_register(REG_OFFSET, BC->calibration[2]);
 	} else {
 		// EEPROM doesn't contain calibration, store current calibration
 		BC->calibration[0] = CALIBRATION_EEPROM_MAGIC0;
@@ -92,16 +92,8 @@ void constructor(void) {
 
 	BA->bricklet_deselect(BS->port - 'a');
 
-	// Select offset calibration mode, 12.5pF oscillator load capacitance
-	uint8_t oscillator = REG_OSCILLATOR_CL_12PF;
-
-	if (BC->calibration[2] == CALIBRATION_MODE_LOW_POWER) {
-		oscillator |= REG_OSCILLATOR_OFFM_LOW_POWER;
-	} else {
-		oscillator |= REG_OSCILLATOR_OFFM_FAST_CONNECTION;
-	}
-
-	write_register(REG_OSCILLATOR, oscillator);
+	// Select 12.5pF oscillator load capacitance
+	write_register(REG_OSCILLATOR, REG_OSCILLATOR_CL_12PF);
 
 	// Enable 100th second and set CLK pin frequency to 0Hz
 	write_register(REG_FUNCTION, REG_FUNCTION_100TH_ENABLED | REG_FUNCTION_COF_STATIC_LOW);
