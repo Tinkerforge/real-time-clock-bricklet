@@ -271,6 +271,16 @@
 
 typedef struct {
 	uint8_t calibration[3]; // magic0, magic1, offset
+
+	uint32_t period_date_time;
+	uint32_t period_date_time_counter;
+	bool last_date_time_valid;
+	uint64_t last_date_time_merged;
+
+	uint32_t period_timestamp;
+	uint32_t period_timestamp_counter;
+	bool last_timestamp_valid;
+	uint64_t last_timestamp_merged;
 } BrickContext;
 
 #endif

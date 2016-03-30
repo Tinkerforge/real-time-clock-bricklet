@@ -53,6 +53,22 @@ void invocation(const ComType com, const uint8_t *data) {
 			get_offset(com, (GetOffset*)data);
 			return;
 
+		case FID_SET_DATE_TIME_CALLBACK_PERIOD:
+			set_date_time_callback_period(com, (SetDateTimeCallbackPeriod*)data);
+			return;
+
+		case FID_GET_DATE_TIME_CALLBACK_PERIOD:
+			get_date_time_callback_period(com, (GetDateTimeCallbackPeriod*)data);
+			return;
+
+		case FID_SET_TIMESTAMP_CALLBACK_PERIOD:
+			set_timestamp_callback_period(com, (SetTimestampCallbackPeriod*)data);
+			return;
+
+		case FID_GET_TIMESTAMP_CALLBACK_PERIOD:
+			get_timestamp_callback_period(com, (GetTimestampCallbackPeriod*)data);
+			return;
+
 		default:
 			BA->com_return_error(data, sizeof(MessageHeader), MESSAGE_ERROR_CODE_NOT_SUPPORTED, com);
 			return;
@@ -61,6 +77,14 @@ void invocation(const ComType com, const uint8_t *data) {
 
 void constructor(void) {
 	_Static_assert(sizeof(BrickContext) <= BRICKLET_CONTEXT_MAX_SIZE, "BrickContext too big");
+
+	BC->period_date_time = 0;
+	BC->period_date_time_counter = 0;
+	BC->last_date_time_valid = false;
+
+	BC->period_timestamp = 0;
+	BC->period_timestamp_counter = 0;
+	BC->last_timestamp_valid = false;
 
 	// Setting the interrupt pin as input
 	PIN_INT.pio->PIO_PUER = PIN_INT.mask;
@@ -106,6 +130,58 @@ void destructor(void) {
 }
 
 void tick(const uint8_t tick_type) {
+	if (tick_type & TICK_TASK_TYPE_CALCULATION) {
+		if (BC->period_date_time_counter != 0) {
+			BC->period_date_time_counter--;
+		}
+
+		if (BC->period_timestamp_counter != 0) {
+			BC->period_timestamp_counter--;
+		}
+	}
+
+	if (tick_type & TICK_TASK_TYPE_MESSAGE) {
+		DateTime dt;
+		uint64_t registers_merged = 0xFFFFFFFF;
+
+		if ((BC->period_date_time != 0 &&
+		     BC->period_date_time_counter == 0) ||
+		    (BC->period_timestamp != 0 &&
+		     BC->period_timestamp_counter == 0)) {
+			BA->com_make_default_header(&dt, BS->uid, sizeof(dt), FID_DATE_TIME);
+
+			registers_merged = read_date_time(&dt.fields);
+		}
+
+		if (BC->period_date_time != 0 &&
+		    BC->period_date_time_counter == 0) {
+			if (!BC->last_date_time_valid || BC->last_date_time_merged != registers_merged) {
+				BA->send_blocking_with_timeout(&dt, sizeof(dt), *BA->com_current);
+
+				BC->period_date_time_counter = BC->period_date_time;
+
+				BC->last_date_time_valid = true;
+				BC->last_date_time_merged = registers_merged;
+			}
+		}
+
+		if (BC->period_timestamp != 0 &&
+		    BC->period_timestamp_counter == 0) {
+			if (!BC->last_timestamp_valid || BC->last_timestamp_merged != registers_merged) {
+				Timestamp t;
+				BA->com_make_default_header(&t, BS->uid, sizeof(t), FID_TIMESTAMP);
+
+				t.timestamp = calculate_timestamp(&dt.fields);
+
+				BA->send_blocking_with_timeout(&t, sizeof(t), *BA->com_current);
+
+				BC->period_timestamp_counter = BC->period_timestamp;
+
+				BC->last_timestamp_valid = true;
+				BC->last_timestamp_merged = registers_merged;
+			}
+		}
+	}
 }
 
 void set_date_time(const ComType com, const SetDateTime *data) {
@@ -147,66 +223,25 @@ void set_date_time(const ComType com, const SetDateTime *data) {
 
 void get_date_time(const ComType com, const GetDateTime *data) {
 	GetDateTimeReturn gdtr;
-	uint8_t bytes[8];
 
 	gdtr.header        = data->header;
 	gdtr.header.length = sizeof(gdtr);
 
-	read_registers(REG_RTC_TIME_100TH_SECOND, bytes, 8);
-
-	gdtr.year        = 2000 + bcd2bin(bytes[7]);
-	gdtr.month       = bcd2bin(bytes[6]);
-	gdtr.day         = bcd2bin(bytes[4]);
-	gdtr.hour        = bcd2bin(bytes[3]);
-	gdtr.minute      = bcd2bin(bytes[2] & 0b01111111); // remove EMON bit
-	gdtr.second      = bcd2bin(bytes[1] & 0b01111111); // remove OS bit
-	gdtr.centisecond = bcd2bin(bytes[0]);
-	gdtr.weekday     = bcd2bin(bytes[5]);
-
-	// Convert from [Sun..Sat] == [0..6] to [Mon..Sun] == [1..7]
-	if (gdtr.weekday == 0) {
-		gdtr.weekday = 7;
-	}
+	read_date_time(&gdtr.fields);
 
 	BA->send_blocking_with_timeout(&gdtr, sizeof(gdtr), com);
 }
 
-static const uint16_t days_before_this_month_table[12] = {
-	0,
-	31,
-	31 + 28,
-	31 + 28 + 31,
-	31 + 28 + 31 + 30,
-	31 + 28 + 31 + 30 + 31,
-	31 + 28 + 31 + 30 + 31 + 30,
-	31 + 28 + 31 + 30 + 31 + 30 + 31,
-	31 + 28 + 31 + 30 + 31 + 30 + 31 + 31,
-	31 + 28 + 31 + 30 + 31 + 30 + 31 + 31 + 30,
-	31 + 28 + 31 + 30 + 31 + 30 + 31 + 31 + 30 + 31,
-	31 + 28 + 31 + 30 + 31 + 30 + 31 + 31 + 30 + 31 + 30
-};
-
 void get_timestamp(const ComType com, const GetTimestamp *data) {
 	GetTimestampReturn gtr;
-	uint8_t bytes[8];
+	DateTimeFields fields;
 
 	gtr.header        = data->header;
 	gtr.header.length = sizeof(gtr);
 
-	read_registers(REG_RTC_TIME_100TH_SECOND, bytes, 8);
+	read_date_time(&fields);
 
-	uint8_t year        = bcd2bin(bytes[7]); // [0..99]
-	uint8_t month       = bcd2bin(bytes[6]); // [1..12]
-	uint8_t day         = bcd2bin(bytes[4]); // [1..31]
-	uint8_t hour        = bcd2bin(bytes[3]); // [0..23]
-	uint8_t minute      = bcd2bin(bytes[2] & 0b01111111); // [0..59], remove EMON bit
-	uint8_t second      = bcd2bin(bytes[1] & 0b01111111); // [0..59], remove OS bit
-	uint8_t centisecond = bcd2bin(bytes[0]); // [0..99]
-
-	int64_t days_before_this_year  = year * 365 + (MAX((int8_t)year - 1, 0)) / 4 + (year > 0 ? 1 : 0);
-	int64_t days_before_this_month = days_before_this_month_table[month - 1] + (month > 2 && year % 4 == 0 ? 1 : 0);
-
-	gtr.timestamp = (((((days_before_this_year + days_before_this_month + day - 1) * 24 + hour) * 60 + minute) * 60) + second) * 1000 + centisecond * 10;
+	gtr.timestamp     = calculate_timestamp(&fields);
 
 	BA->send_blocking_with_timeout(&gtr, sizeof(gtr), com);
 }
@@ -234,6 +269,38 @@ void get_offset(const ComType com, const GetOffset *data) {
 	gor.offset        = BC->calibration[2];
 
 	BA->send_blocking_with_timeout(&gor, sizeof(gor), com);
+}
+
+void set_date_time_callback_period(const ComType com, const SetDateTimeCallbackPeriod *data) {
+	BC->period_date_time = data->period;
+
+	BA->com_return_setter(com, data);
+}
+
+void get_date_time_callback_period(const ComType com, const GetDateTimeCallbackPeriod *data) {
+	GetDateTimeCallbackPeriodReturn gdtcpr;
+
+	gdtcpr.header         = data->header;
+	gdtcpr.header.length  = sizeof(gdtcpr);
+	gdtcpr.period         = BC->period_date_time;
+
+	BA->send_blocking_with_timeout(&gdtcpr, sizeof(gdtcpr), com);
+}
+
+void set_timestamp_callback_period(const ComType com, const SetTimestampCallbackPeriod *data) {
+	BC->period_timestamp = data->period;
+
+	BA->com_return_setter(com, data);
+}
+
+void get_timestamp_callback_period(const ComType com, const GetTimestampCallbackPeriod *data) {
+	GetTimestampCallbackPeriodReturn gtcpr;
+
+	gtcpr.header         = data->header;
+	gtcpr.header.length  = sizeof(gtcpr);
+	gtcpr.period         = BC->period_timestamp;
+
+	BA->send_blocking_with_timeout(&gtcpr, sizeof(gtcpr), com);
 }
 
 uint8_t read_register(const uint8_t reg) {
@@ -284,6 +351,57 @@ void write_registers(const uint8_t reg, const uint8_t *data, const uint8_t lengt
 	}
 
 	i2c_stop();
+}
+
+uint64_t read_date_time(DateTimeFields *fields) {
+	union {
+		uint8_t bytes[8];
+		uint64_t merged;
+	} data;
+
+	read_registers(REG_RTC_TIME_100TH_SECOND, data.bytes, 8);
+
+	data.bytes[2] &= 0b01111111; // remove EMON bit
+	data.bytes[1] &= 0b01111111; // remove OS bit
+
+	fields->year        = 2000 + bcd2bin(data.bytes[7]);
+	fields->month       = bcd2bin(data.bytes[6]);
+	fields->day         = bcd2bin(data.bytes[4]);
+	fields->hour        = bcd2bin(data.bytes[3]);
+	fields->minute      = bcd2bin(data.bytes[2]);
+	fields->second      = bcd2bin(data.bytes[1]);
+	fields->centisecond = bcd2bin(data.bytes[0]);
+	fields->weekday     = bcd2bin(data.bytes[5]);
+
+	// Convert from [Sun..Sat] == [0..6] to [Mon..Sun] == [1..7]
+	if (fields->weekday == 0) {
+		fields->weekday = 7;
+	}
+
+	return data.merged;
+}
+
+static const uint16_t days_before_this_month_table[12] = {
+	0,
+	31,
+	31 + 28,
+	31 + 28 + 31,
+	31 + 28 + 31 + 30,
+	31 + 28 + 31 + 30 + 31,
+	31 + 28 + 31 + 30 + 31 + 30,
+	31 + 28 + 31 + 30 + 31 + 30 + 31,
+	31 + 28 + 31 + 30 + 31 + 30 + 31 + 31,
+	31 + 28 + 31 + 30 + 31 + 30 + 31 + 31 + 30,
+	31 + 28 + 31 + 30 + 31 + 30 + 31 + 31 + 30 + 31,
+	31 + 28 + 31 + 30 + 31 + 30 + 31 + 31 + 30 + 31 + 30
+};
+
+int64_t calculate_timestamp(DateTimeFields *fields) {
+	uint8_t year = fields->year - 2000;
+	int64_t days_before_this_year = year * 365 + (MAX((int8_t)year - 1, 0)) / 4 + (year > 0 ? 1 : 0);
+	int64_t days_before_this_month = days_before_this_month_table[fields->month - 1] + (fields->month > 2 && year % 4 == 0 ? 1 : 0);
+
+	return (((((days_before_this_year + days_before_this_month + fields->day - 1) * 24 + fields->hour) * 60 + fields->minute) * 60) + fields->second) * 1000 + fields->centisecond * 10;
 }
 
 bool i2c_scl_value(void) {

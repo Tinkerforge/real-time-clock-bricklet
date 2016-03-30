@@ -34,6 +34,26 @@
 #define FID_GET_TIMESTAMP 3
 #define FID_SET_OFFSET 4
 #define FID_GET_OFFSET 5
+#define FID_SET_DATE_TIME_CALLBACK_PERIOD 6
+#define FID_GET_DATE_TIME_CALLBACK_PERIOD 7
+#define FID_SET_TIMESTAMP_CALLBACK_PERIOD 8
+#define FID_GET_TIMESTAMP_CALLBACK_PERIOD 9
+#define FID_SET_ALARM 10
+#define FID_GET_ALARM 11
+#define FID_DATE_TIME 12
+#define FID_TIMESTAMP 13
+#define FID_ALARM 14
+
+typedef struct {
+	uint16_t year;
+	uint8_t month;
+	uint8_t day;
+	uint8_t hour;
+	uint8_t minute;
+	uint8_t second;
+	uint8_t centisecond;
+	uint8_t weekday;
+} __attribute__((__packed__)) DateTimeFields;
 
 typedef struct {
 	MessageHeader header;
@@ -57,14 +77,7 @@ typedef struct {
 
 typedef struct {
 	MessageHeader header;
-	uint16_t year;
-	uint8_t month;
-	uint8_t day;
-	uint8_t hour;
-	uint8_t minute;
-	uint8_t second;
-	uint8_t centisecond;
-	uint8_t weekday;
+	DateTimeFields fields;
 } __attribute__((__packed__)) GetDateTimeReturn;
 
 typedef struct {
@@ -90,6 +103,44 @@ typedef struct {
 	int8_t offset;
 } __attribute__((__packed__)) GetOffsetReturn;
 
+typedef struct {
+	MessageHeader header;
+	uint32_t period;
+} __attribute__((__packed__)) SetDateTimeCallbackPeriod;
+
+typedef struct {
+	MessageHeader header;
+} __attribute__((__packed__)) GetDateTimeCallbackPeriod;
+
+typedef struct {
+	MessageHeader header;
+	uint32_t period;
+} __attribute__((__packed__)) GetDateTimeCallbackPeriodReturn;
+
+typedef struct {
+	MessageHeader header;
+	uint32_t period;
+} __attribute__((__packed__)) SetTimestampCallbackPeriod;
+
+typedef struct {
+	MessageHeader header;
+} __attribute__((__packed__)) GetTimestampCallbackPeriod;
+
+typedef struct {
+	MessageHeader header;
+	uint32_t period;
+} __attribute__((__packed__)) GetTimestampCallbackPeriodReturn;
+
+typedef struct {
+	MessageHeader header;
+	DateTimeFields fields;
+} __attribute__((__packed__)) DateTime;
+
+typedef struct {
+	MessageHeader header;
+	int64_t timestamp;
+} __attribute__((__packed__)) Timestamp;
+
 void invocation(const ComType com, const uint8_t *data);
 void constructor(void);
 void destructor(void);
@@ -103,10 +154,19 @@ void get_timestamp(const ComType com, const GetTimestamp *data);
 void set_offset(const ComType com, const SetOffset *data);
 void get_offset(const ComType com, const GetOffset *data);
 
+void set_date_time_callback_period(const ComType com, const SetDateTimeCallbackPeriod *data);
+void get_date_time_callback_period(const ComType com, const GetDateTimeCallbackPeriod *data);
+
+void set_timestamp_callback_period(const ComType com, const SetTimestampCallbackPeriod *data);
+void get_timestamp_callback_period(const ComType com, const GetTimestampCallbackPeriod *data);
+
 uint8_t read_register(const uint8_t reg);
 void read_registers(const uint8_t reg, uint8_t *data, const uint8_t length);
 void write_register(const uint8_t reg, const uint8_t value);
 void write_registers(const uint8_t reg, const uint8_t *data, const uint8_t length);
+
+uint64_t read_date_time(DateTimeFields *fields);
+int64_t calculate_timestamp(DateTimeFields *fields);
 
 bool i2c_scl_value(void);
 void i2c_scl_high(void);
