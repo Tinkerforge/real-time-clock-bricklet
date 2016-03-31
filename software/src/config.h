@@ -57,7 +57,7 @@
 #define REG_RTC_TIME_MINUTE                       0x02
 #define REG_RTC_TIME_HOUR                         0x03
 #define REG_RTC_DATE_DAY                          0x04
-#define REG_RTC_DATE_WEAKDAY                      0x05
+#define REG_RTC_DATE_WEEKDAY                      0x05
 #define REG_RTC_DATE_MONTH                        0x06
 #define REG_RTC_DATE_YEAR                         0x07
 
@@ -281,6 +281,9 @@ typedef struct {
 	uint32_t period_timestamp_counter;
 	bool last_timestamp_valid;
 	uint64_t last_timestamp_merged;
+
+	uint8_t flags;
+	uint8_t alarm_enable;
 } BrickContext;
 
 #endif

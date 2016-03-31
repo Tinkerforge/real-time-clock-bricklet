@@ -133,6 +133,30 @@ typedef struct {
 
 typedef struct {
 	MessageHeader header;
+	int8_t month;
+	int8_t day;
+	int8_t hour;
+	int8_t minute;
+	int8_t second;
+	int8_t weekday;
+} __attribute__((__packed__)) SetAlarm;
+
+typedef struct {
+	MessageHeader header;
+} __attribute__((__packed__)) GetAlarm;
+
+typedef struct {
+	MessageHeader header;
+	int8_t month;
+	int8_t day;
+	int8_t hour;
+	int8_t minute;
+	int8_t second;
+	int8_t weekday;
+} __attribute__((__packed__)) GetAlarmReturn;
+
+typedef struct {
+	MessageHeader header;
 	DateTimeFields fields;
 } __attribute__((__packed__)) DateTime;
 
@@ -140,6 +164,12 @@ typedef struct {
 	MessageHeader header;
 	int64_t timestamp;
 } __attribute__((__packed__)) Timestamp;
+
+typedef struct {
+	MessageHeader header;
+	DateTimeFields fields;
+	int64_t timestamp;
+} __attribute__((__packed__)) Alarm;
 
 void invocation(const ComType com, const uint8_t *data);
 void constructor(void);
@@ -160,6 +190,9 @@ void get_date_time_callback_period(const ComType com, const GetDateTimeCallbackP
 void set_timestamp_callback_period(const ComType com, const SetTimestampCallbackPeriod *data);
 void get_timestamp_callback_period(const ComType com, const GetTimestampCallbackPeriod *data);
 
+void set_alarm(const ComType com, const SetAlarm *data);
+void get_alarm(const ComType com, const GetAlarm *data);
+
 uint8_t read_register(const uint8_t reg);
 void read_registers(const uint8_t reg, uint8_t *data, const uint8_t length);
 void write_register(const uint8_t reg, const uint8_t value);
@@ -177,6 +210,7 @@ void i2c_sda_low(void);
 void i2c_sleep_halfclock(void);
 void i2c_stop(void);
 void i2c_start(void);
+void i2c_foobar(bool high);
 uint8_t i2c_recv_byte(bool ack);
 bool i2c_send_byte(const uint8_t value);
 

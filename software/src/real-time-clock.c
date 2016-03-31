@@ -69,6 +69,14 @@ void invocation(const ComType com, const uint8_t *data) {
 			get_timestamp_callback_period(com, (GetTimestampCallbackPeriod*)data);
 			return;
 
+		case FID_SET_ALARM:
+			set_alarm(com, (SetAlarm*)data);
+			return;
+
+		case FID_GET_ALARM:
+			get_alarm(com, (GetAlarm*)data);
+			return;
+
 		default:
 			BA->com_return_error(data, sizeof(MessageHeader), MESSAGE_ERROR_CODE_NOT_SUPPORTED, com);
 			return;
@@ -78,13 +86,18 @@ void invocation(const ComType com, const uint8_t *data) {
 void constructor(void) {
 	_Static_assert(sizeof(BrickContext) <= BRICKLET_CONTEXT_MAX_SIZE, "BrickContext too big");
 
-	BC->period_date_time = 0;
-	BC->period_date_time_counter = 0;
-	BC->last_date_time_valid = false;
+	BrickContext *bc = BC;
 
-	BC->period_timestamp = 0;
-	BC->period_timestamp_counter = 0;
-	BC->last_timestamp_valid = false;
+	bc->period_date_time = 0;
+	bc->period_date_time_counter = 0;
+	bc->last_date_time_valid = false;
+
+	bc->period_timestamp = 0;
+	bc->period_timestamp_counter = 0;
+	bc->last_timestamp_valid = false;
+
+	bc->flags = 0;
+	bc->alarm_enable = 0;
 
 	// Setting the interrupt pin as input
 	PIN_INT.pio->PIO_PUER = PIN_INT.mask;
@@ -96,22 +109,22 @@ void constructor(void) {
 
 	BA->i2c_eeprom_master_read(BA->twid->pTwi,
 	                           CALIBRATION_EEPROM_POSITION,
-	                           (char *)BC->calibration,
-	                           sizeof(BC->calibration));
+	                           (char *)bc->calibration,
+	                           sizeof(bc->calibration));
 
-	if (BC->calibration[0] == CALIBRATION_EEPROM_MAGIC0 &&
-	    BC->calibration[1] == CALIBRATION_EEPROM_MAGIC1) {
-		write_register(REG_OFFSET, BC->calibration[2]);
+	if (bc->calibration[0] == CALIBRATION_EEPROM_MAGIC0 &&
+	    bc->calibration[1] == CALIBRATION_EEPROM_MAGIC1) {
+		write_register(REG_OFFSET, bc->calibration[2]);
 	} else {
 		// EEPROM doesn't contain calibration, store current calibration
-		BC->calibration[0] = CALIBRATION_EEPROM_MAGIC0;
-		BC->calibration[1] = CALIBRATION_EEPROM_MAGIC1;
-		BC->calibration[2] = read_register(REG_OFFSET);
+		bc->calibration[0] = CALIBRATION_EEPROM_MAGIC0;
+		bc->calibration[1] = CALIBRATION_EEPROM_MAGIC1;
+		bc->calibration[2] = read_register(REG_OFFSET);
 
 		BA->i2c_eeprom_master_write(BA->twid->pTwi,
 		                            CALIBRATION_EEPROM_POSITION,
-		                            (const char*)BC->calibration,
-		                            sizeof(BC->calibration));
+		                            (const char*)bc->calibration,
+		                            sizeof(bc->calibration));
 	}
 
 	BA->bricklet_deselect(BS->port - 'a');
@@ -122,21 +135,32 @@ void constructor(void) {
 	// Enable 100th second and set CLK pin frequency to 0Hz
 	write_register(REG_FUNCTION, REG_FUNCTION_100TH_ENABLED | REG_FUNCTION_COF_STATIC_LOW);
 
-	// Disable CLK pin
-	write_register(REG_PIN_IO, REG_PIN_IO_CLKPM_DISABLE);
+	// Disable CLK pin and enable nINTA output pin
+	write_register(REG_PIN_IO, REG_PIN_IO_CLKPM_DISABLE | REG_PIN_IO_INTAPM_INTA);
+
+	// Enable nINTA interrupts
+	write_register(REG_INTA_ENABLE, REG_INTA_ENABLE_ALARM1 | REG_INTA_ENABLE_ALARM2 | REG_INTA_ENABLE_LEVEL_MODE);
 }
 
 void destructor(void) {
 }
 
 void tick(const uint8_t tick_type) {
+	BrickContext *bc = BC;
+
 	if (tick_type & TICK_TASK_TYPE_CALCULATION) {
-		if (BC->period_date_time_counter != 0) {
-			BC->period_date_time_counter--;
+		if (!(PIN_INT.pio->PIO_PDSR & PIN_INT.mask)) { // nINTA
+			bc->flags = read_register(REG_FLAGS);
+			bc->alarm_enable = read_register(REG_RTC_ALARM_ENABLE);
+			write_register(REG_FLAGS, 0);
 		}
 
-		if (BC->period_timestamp_counter != 0) {
-			BC->period_timestamp_counter--;
+		if (bc->period_date_time_counter != 0) {
+			bc->period_date_time_counter--;
+		}
+
+		if (bc->period_timestamp_counter != 0) {
+			bc->period_timestamp_counter--;
 		}
 	}
 
@@ -144,30 +168,30 @@ void tick(const uint8_t tick_type) {
 		DateTime dt;
 		uint64_t registers_merged = 0xFFFFFFFF;
 
-		if ((BC->period_date_time != 0 &&
-		     BC->period_date_time_counter == 0) ||
-		    (BC->period_timestamp != 0 &&
-		     BC->period_timestamp_counter == 0)) {
+		if ((bc->period_date_time != 0 &&
+		     bc->period_date_time_counter == 0) ||
+		    (bc->period_timestamp != 0 &&
+		     bc->period_timestamp_counter == 0)) {
 			BA->com_make_default_header(&dt, BS->uid, sizeof(dt), FID_DATE_TIME);
 
 			registers_merged = read_date_time(&dt.fields);
 		}
 
-		if (BC->period_date_time != 0 &&
-		    BC->period_date_time_counter == 0) {
-			if (!BC->last_date_time_valid || BC->last_date_time_merged != registers_merged) {
+		if (bc->period_date_time != 0 &&
+		    bc->period_date_time_counter == 0) {
+			if (!bc->last_date_time_valid || bc->last_date_time_merged != registers_merged) {
 				BA->send_blocking_with_timeout(&dt, sizeof(dt), *BA->com_current);
 
-				BC->period_date_time_counter = BC->period_date_time;
+				bc->period_date_time_counter = bc->period_date_time;
 
-				BC->last_date_time_valid = true;
-				BC->last_date_time_merged = registers_merged;
+				bc->last_date_time_valid = true;
+				bc->last_date_time_merged = registers_merged;
 			}
 		}
 
-		if (BC->period_timestamp != 0 &&
-		    BC->period_timestamp_counter == 0) {
-			if (!BC->last_timestamp_valid || BC->last_timestamp_merged != registers_merged) {
+		if (bc->period_timestamp != 0 &&
+		    bc->period_timestamp_counter == 0) {
+			if (!bc->last_timestamp_valid || bc->last_timestamp_merged != registers_merged) {
 				Timestamp t;
 				BA->com_make_default_header(&t, BS->uid, sizeof(t), FID_TIMESTAMP);
 
@@ -175,11 +199,64 @@ void tick(const uint8_t tick_type) {
 
 				BA->send_blocking_with_timeout(&t, sizeof(t), *BA->com_current);
 
-				BC->period_timestamp_counter = BC->period_timestamp;
+				bc->period_timestamp_counter = bc->period_timestamp;
 
-				BC->last_timestamp_valid = true;
-				BC->last_timestamp_merged = registers_merged;
+				bc->last_timestamp_valid = true;
+				bc->last_timestamp_merged = registers_merged;
 			}
+		}
+
+		if (bc->flags & (REG_FLAGS_ALARM1 | REG_FLAGS_ALARM2)) {
+			uint8_t expected = 0;
+			uint8_t found = 0;
+
+			if (bc->alarm_enable & REG_RTC_ALARM_ENABLE_A1E_mask) {
+				++expected;
+
+				if (bc->flags & REG_FLAGS_ALARM1) {
+					++found;
+				}
+			}
+
+			if (bc->alarm_enable & REG_RTC_ALARM_ENABLE_A2E_mask) {
+				++expected;
+
+				if (bc->flags & REG_FLAGS_ALARM2) {
+					++found;
+				}
+			}
+
+			bool triggered = false;
+
+			if (expected > 0) {
+				if (expected == found) {
+					triggered = true;
+				} else if (expected == 2 && (bc->flags & REG_FLAGS_ALARM1)) {
+					// Special case: weekday + other fields are enabled and the
+					// other fields have triggered, but the weekday had already
+					// triggered before or not at all. Manually check if the
+					// weekday still matches to manually trigger the alarm.
+					uint8_t alarm_weekday = read_register(REG_RTC_ALARM2_WEEKDAY);
+					uint8_t date_weekday = read_register(REG_RTC_DATE_WEEKDAY);
+
+					if (alarm_weekday == date_weekday) {
+						triggered = true;
+					}
+				}
+			}
+
+			if (triggered) {
+				Alarm a;
+				BA->com_make_default_header(&a, BS->uid, sizeof(a), FID_ALARM);
+
+				read_date_time(&a.fields);
+				a.timestamp = calculate_timestamp(&a.fields);
+
+				BA->send_blocking_with_timeout(&a, sizeof(a), *BA->com_current);
+			}
+
+			bc->flags = 0;
+			bc->alarm_enable = 0;
 		}
 	}
 }
@@ -301,6 +378,137 @@ void get_timestamp_callback_period(const ComType com, const GetTimestampCallback
 	gtcpr.period         = BC->period_timestamp;
 
 	BA->send_blocking_with_timeout(&gtcpr, sizeof(gtcpr), com);
+}
+
+void set_alarm(const ComType com, const SetAlarm *data) {
+#if 0
+	// FIXME: this would be the classic way of parameter checking, but with
+	//        this GCC misscompiles the code. therefore, parameter checking is
+	//        integrated with the parameter translation
+	if ((data->month != -1 && (data->month < 1 || data->month > 12)) ||
+	    (data->day != -1 && (data->day < 1 || data->day > 31)) ||
+	    (data->hour != -1 && (data->hour < 0 || data->hour > 23)) ||
+	    (data->minute != -1 && (data->minute < 0 || data->minute > 59)) ||
+	    (data->second != -1 && (data->second < 0 || data->second > 59)) ||
+	    (data->weekday != -1 && (data->weekday < 1 || data->weekday > 7))) {
+		BA->com_return_error(data, sizeof(MessageHeader), MESSAGE_ERROR_CODE_INVALID_PARAMETER, com);
+		return;
+	}
+#endif
+
+	uint8_t bytes[9] = {0};
+	bool invalid = false;
+
+	if (data->second >= 0 && data->second <= 59) {
+		bytes[0] = bin2bcd(data->second);
+		bytes[8] |= REG_RTC_ALARM_ENABLE_A1E_SECOND;
+	} else if (data->second != -1) {
+		invalid = true;
+	}
+
+	if (data->minute >= 0 && data->minute <= 59) {
+		bytes[1] = bin2bcd(data->minute);
+		bytes[8] |= REG_RTC_ALARM_ENABLE_A1E_MINUTE;
+	} else if (data->minute != -1) {
+		invalid = true;
+	}
+
+	if (data->hour >= 0 && data->hour <= 23) {
+		bytes[2] = bin2bcd(data->hour);
+		bytes[8] |= REG_RTC_ALARM_ENABLE_A1E_HOUR;
+	} else if (data->hour != -1) {
+		invalid = true;
+	}
+
+	if (data->day >= 1 && data->day <= 31) {
+		bytes[3] = bin2bcd(data->day);
+		bytes[8] |= REG_RTC_ALARM_ENABLE_A1E_DAY;
+	} else if (data->day != -1) {
+		invalid = true;
+	}
+
+	if (data->month >= 1 && data->month <= 12) {
+		bytes[4] = bin2bcd(data->month);
+		bytes[8] |= REG_RTC_ALARM_ENABLE_A1E_MONTH;
+	} else if (data->month != -1) {
+		invalid = true;
+	}
+
+	if (data->weekday >= 1 && data->weekday <= 7) {
+		bytes[7] = bin2bcd(data->weekday % 7), // Convert from [Mon..Sun] == [1..7] to [Sun..Sat] == [0..6]
+		bytes[8] |= REG_RTC_ALARM_ENABLE_A2E_WEEKDAY;
+	} else if (data->weekday != -1) {
+		invalid = true;
+	}
+
+	if (invalid) {
+		BA->com_return_error(data, sizeof(MessageHeader), MESSAGE_ERROR_CODE_INVALID_PARAMETER, com);
+		return;
+	}
+
+	// Clear alarm enable bits
+	write_register(REG_RTC_ALARM_ENABLE, 0);
+
+	// Clear alarm interrupt flags
+	write_register(REG_FLAGS, 0);
+
+	// Set alarm and enable bits
+	write_registers(REG_RTC_ALARM1_SECOND, bytes, 9);
+
+	BA->com_return_setter(com, data);
+}
+
+void get_alarm(const ComType com, const GetAlarm *data) {
+	GetAlarmReturn gar;
+	uint8_t bytes[9];
+
+	gar.header         = data->header;
+	gar.header.length  = sizeof(gar);
+
+	read_registers(REG_RTC_ALARM1_SECOND, bytes, 9);
+
+	if (bytes[8] & REG_RTC_ALARM_ENABLE_A1E_MONTH) {
+		gar.month = bcd2bin(bytes[4]);
+	} else {
+		gar.month = -1;
+	}
+
+	if (bytes[8] & REG_RTC_ALARM_ENABLE_A1E_DAY) {
+		gar.day = bcd2bin(bytes[3]);
+	} else {
+		gar.day = -1;
+	}
+
+	if (bytes[8] & REG_RTC_ALARM_ENABLE_A1E_HOUR) {
+		gar.hour = bcd2bin(bytes[2]);
+	} else {
+		gar.hour = -1;
+	}
+
+	if (bytes[8] & REG_RTC_ALARM_ENABLE_A1E_MINUTE) {
+		gar.minute = bcd2bin(bytes[1]);
+	} else {
+		gar.minute = -1;
+	}
+
+	if (bytes[8] & REG_RTC_ALARM_ENABLE_A1E_SECOND) {
+		gar.second = bcd2bin(bytes[0]);
+	} else {
+		gar.second = -1;
+	}
+
+	if (bytes[8] & REG_RTC_ALARM_ENABLE_A2E_WEEKDAY) {
+		gar.weekday = bcd2bin(bytes[7]);
+
+		// Convert from [Sun..Sat] == [0..6] to [Mon..Sun] == [1..7]
+		if (gar.weekday == 0) {
+			gar.weekday = 7;
+		}
+	} else {
+		gar.weekday = -1;
+	}
+
+	BA->send_blocking_with_timeout(&gar, sizeof(gar), com);
 }
 
 uint8_t read_register(const uint8_t reg) {
