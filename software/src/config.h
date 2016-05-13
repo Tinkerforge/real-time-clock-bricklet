@@ -31,7 +31,7 @@
 
 #define BRICKLET_FIRMWARE_VERSION_MAJOR 2
 #define BRICKLET_FIRMWARE_VERSION_MINOR 0
-#define BRICKLET_FIRMWARE_VERSION_REVISION 0
+#define BRICKLET_FIRMWARE_VERSION_REVISION 1
 #define BRICKLET_HARDWARE_VERSION_MAJOR 1
 #define BRICKLET_HARDWARE_VERSION_MINOR 0
 #define BRICKLET_HARDWARE_VERSION_REVISION 0
@@ -277,13 +277,9 @@ typedef struct {
 	bool last_date_time_valid;
 	uint64_t last_date_time_merged;
 
-	uint32_t period_timestamp;
-	uint32_t period_timestamp_counter;
-	bool last_timestamp_valid;
-	uint64_t last_timestamp_merged;
-
 	uint8_t flags;
 	uint8_t alarm_enable;
+	int32_t interval; // in seconds
 } BrickContext;
 
 #endif

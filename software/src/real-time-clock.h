@@ -36,13 +36,10 @@
 #define FID_GET_OFFSET 5
 #define FID_SET_DATE_TIME_CALLBACK_PERIOD 6
 #define FID_GET_DATE_TIME_CALLBACK_PERIOD 7
-#define FID_SET_TIMESTAMP_CALLBACK_PERIOD 8
-#define FID_GET_TIMESTAMP_CALLBACK_PERIOD 9
-#define FID_SET_ALARM 10
-#define FID_GET_ALARM 11
-#define FID_DATE_TIME 12
-#define FID_TIMESTAMP 13
-#define FID_ALARM 14
+#define FID_SET_ALARM 8
+#define FID_GET_ALARM 9
+#define FID_DATE_TIME 10
+#define FID_ALARM 11
 
 typedef struct {
 	uint16_t year;
@@ -119,26 +116,13 @@ typedef struct {
 
 typedef struct {
 	MessageHeader header;
-	uint32_t period;
-} __attribute__((__packed__)) SetTimestampCallbackPeriod;
-
-typedef struct {
-	MessageHeader header;
-} __attribute__((__packed__)) GetTimestampCallbackPeriod;
-
-typedef struct {
-	MessageHeader header;
-	uint32_t period;
-} __attribute__((__packed__)) GetTimestampCallbackPeriodReturn;
-
-typedef struct {
-	MessageHeader header;
 	int8_t month;
 	int8_t day;
 	int8_t hour;
 	int8_t minute;
 	int8_t second;
 	int8_t weekday;
+	int32_t interval; // in seconds
 } __attribute__((__packed__)) SetAlarm;
 
 typedef struct {
@@ -153,17 +137,14 @@ typedef struct {
 	int8_t minute;
 	int8_t second;
 	int8_t weekday;
+	int32_t interval; // in seconds
 } __attribute__((__packed__)) GetAlarmReturn;
 
 typedef struct {
 	MessageHeader header;
 	DateTimeFields fields;
-} __attribute__((__packed__)) DateTime;
-
-typedef struct {
-	MessageHeader header;
 	int64_t timestamp;
-} __attribute__((__packed__)) Timestamp;
+} __attribute__((__packed__)) DateTime;
 
 typedef struct {
 	MessageHeader header;
@@ -187,9 +168,6 @@ void get_offset(const ComType com, const GetOffset *data);
 void set_date_time_callback_period(const ComType com, const SetDateTimeCallbackPeriod *data);
 void get_date_time_callback_period(const ComType com, const GetDateTimeCallbackPeriod *data);
 
-void set_timestamp_callback_period(const ComType com, const SetTimestampCallbackPeriod *data);
-void get_timestamp_callback_period(const ComType com, const GetTimestampCallbackPeriod *data);
-
 void set_alarm(const ComType com, const SetAlarm *data);
 void get_alarm(const ComType com, const GetAlarm *data);
 
@@ -200,6 +178,7 @@ void write_registers(const uint8_t reg, const uint8_t *data, const uint8_t lengt
 
 uint64_t read_date_time(DateTimeFields *fields);
 int64_t calculate_timestamp(DateTimeFields *fields);
+bool add_seconds(DateTimeFields *fields, int32_t seconds);
 
 bool i2c_scl_value(void);
 void i2c_scl_high(void);

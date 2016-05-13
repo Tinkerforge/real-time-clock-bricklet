@@ -61,14 +61,6 @@ void invocation(const ComType com, const uint8_t *data) {
 			get_date_time_callback_period(com, (GetDateTimeCallbackPeriod*)data);
 			return;
 
-		case FID_SET_TIMESTAMP_CALLBACK_PERIOD:
-			set_timestamp_callback_period(com, (SetTimestampCallbackPeriod*)data);
-			return;
-
-		case FID_GET_TIMESTAMP_CALLBACK_PERIOD:
-			get_timestamp_callback_period(com, (GetTimestampCallbackPeriod*)data);
-			return;
-
 		case FID_SET_ALARM:
 			set_alarm(com, (SetAlarm*)data);
 			return;
@@ -86,18 +78,16 @@ void invocation(const ComType com, const uint8_t *data) {
 void constructor(void) {
 	_Static_assert(sizeof(BrickContext) <= BRICKLET_CONTEXT_MAX_SIZE, "BrickContext too big");
 
+	BrickletAPI *ba = BA;
 	BrickContext *bc = BC;
 
 	bc->period_date_time = 0;
 	bc->period_date_time_counter = 0;
 	bc->last_date_time_valid = false;
 
-	bc->period_timestamp = 0;
-	bc->period_timestamp_counter = 0;
-	bc->last_timestamp_valid = false;
-
 	bc->flags = 0;
 	bc->alarm_enable = 0;
+	bc->interval = -1;
 
 	// Setting the interrupt pin as input
 	PIN_INT.pio->PIO_PUER = PIN_INT.mask;
@@ -105,9 +95,9 @@ void constructor(void) {
 	PIN_INT.pio->PIO_PER = PIN_INT.mask;
 
 	// Load calibration from EEPROM
-	BA->bricklet_select(BS->port - 'a');
+	ba->bricklet_select(BS->port - 'a');
 
-	BA->i2c_eeprom_master_read(BA->twid->pTwi,
+	ba->i2c_eeprom_master_read(ba->twid->pTwi,
 	                           CALIBRATION_EEPROM_POSITION,
 	                           (char *)bc->calibration,
 	                           sizeof(bc->calibration));
@@ -121,13 +111,13 @@ void constructor(void) {
 		bc->calibration[1] = CALIBRATION_EEPROM_MAGIC1;
 		bc->calibration[2] = read_register(REG_OFFSET);
 
-		BA->i2c_eeprom_master_write(BA->twid->pTwi,
+		ba->i2c_eeprom_master_write(ba->twid->pTwi,
 		                            CALIBRATION_EEPROM_POSITION,
 		                            (const char*)bc->calibration,
 		                            sizeof(bc->calibration));
 	}
 
-	BA->bricklet_deselect(BS->port - 'a');
+	ba->bricklet_deselect(BS->port - 'a');
 
 	// Select 12.5pF oscillator load capacitance
 	write_register(REG_OSCILLATOR, REG_OSCILLATOR_CL_12PF);
@@ -146,7 +136,9 @@ void destructor(void) {
 }
 
 void tick(const uint8_t tick_type) {
+	BrickletAPI *ba = BA;
 	BrickContext *bc = BC;
+	uint32_t uid = BS->uid;
 
 	if (tick_type & TICK_TASK_TYPE_CALCULATION) {
 		if (!(PIN_INT.pio->PIO_PDSR & PIN_INT.mask)) { // nINTA
@@ -158,51 +150,24 @@ void tick(const uint8_t tick_type) {
 		if (bc->period_date_time_counter != 0) {
 			bc->period_date_time_counter--;
 		}
-
-		if (bc->period_timestamp_counter != 0) {
-			bc->period_timestamp_counter--;
-		}
 	}
 
 	if (tick_type & TICK_TASK_TYPE_MESSAGE) {
-		DateTime dt;
-		uint64_t registers_merged = 0xFFFFFFFF;
+		if (bc->period_date_time != 0 && bc->period_date_time_counter == 0) {
+			DateTime dt;
+			ba->com_make_default_header(&dt, uid, sizeof(dt), FID_DATE_TIME);
 
-		if ((bc->period_date_time != 0 &&
-		     bc->period_date_time_counter == 0) ||
-		    (bc->period_timestamp != 0 &&
-		     bc->period_timestamp_counter == 0)) {
-			BA->com_make_default_header(&dt, BS->uid, sizeof(dt), FID_DATE_TIME);
+			uint64_t registers_merged = read_date_time(&dt.fields);
 
-			registers_merged = read_date_time(&dt.fields);
-		}
-
-		if (bc->period_date_time != 0 &&
-		    bc->period_date_time_counter == 0) {
 			if (!bc->last_date_time_valid || bc->last_date_time_merged != registers_merged) {
-				BA->send_blocking_with_timeout(&dt, sizeof(dt), *BA->com_current);
+				dt.timestamp = calculate_timestamp(&dt.fields);
+
+				ba->send_blocking_with_timeout(&dt, sizeof(dt), *ba->com_current);
 
 				bc->period_date_time_counter = bc->period_date_time;
 
 				bc->last_date_time_valid = true;
 				bc->last_date_time_merged = registers_merged;
-			}
-		}
-
-		if (bc->period_timestamp != 0 &&
-		    bc->period_timestamp_counter == 0) {
-			if (!bc->last_timestamp_valid || bc->last_timestamp_merged != registers_merged) {
-				Timestamp t;
-				BA->com_make_default_header(&t, BS->uid, sizeof(t), FID_TIMESTAMP);
-
-				t.timestamp = calculate_timestamp(&dt.fields);
-
-				BA->send_blocking_with_timeout(&t, sizeof(t), *BA->com_current);
-
-				bc->period_timestamp_counter = bc->period_timestamp;
-
-				bc->last_timestamp_valid = true;
-				bc->last_timestamp_merged = registers_merged;
 			}
 		}
 
@@ -247,12 +212,38 @@ void tick(const uint8_t tick_type) {
 
 			if (triggered) {
 				Alarm a;
-				BA->com_make_default_header(&a, BS->uid, sizeof(a), FID_ALARM);
+				ba->com_make_default_header(&a, uid, sizeof(a), FID_ALARM);
 
 				read_date_time(&a.fields);
 				a.timestamp = calculate_timestamp(&a.fields);
 
-				BA->send_blocking_with_timeout(&a, sizeof(a), *BA->com_current);
+				if (bc->interval >= 0) {
+					DateTimeFields fields = a.fields;
+					uint8_t bytes[9];
+
+					// Clear alarm enable bits
+					write_register(REG_RTC_ALARM_ENABLE, 0);
+
+					// Calculate new alarm
+					if (add_seconds(&fields, bc->interval)) {
+						bytes[0] = bin2bcd(fields.second);
+						bytes[1] = bin2bcd(fields.minute);
+						bytes[2] = bin2bcd(fields.hour);
+						bytes[3] = bin2bcd(fields.day);
+						bytes[4] = bin2bcd(fields.month);
+
+						bytes[8] = REG_RTC_ALARM_ENABLE_A1E_MONTH |
+						           REG_RTC_ALARM_ENABLE_A1E_DAY |
+						           REG_RTC_ALARM_ENABLE_A1E_HOUR |
+						           REG_RTC_ALARM_ENABLE_A1E_MINUTE |
+						           REG_RTC_ALARM_ENABLE_A1E_SECOND;
+
+						// Set alarm and enable bits
+						write_registers(REG_RTC_ALARM1_SECOND, bytes, 9);
+					}
+				}
+
+				ba->send_blocking_with_timeout(&a, sizeof(a), *ba->com_current);
 			}
 
 			bc->flags = 0;
@@ -262,6 +253,8 @@ void tick(const uint8_t tick_type) {
 }
 
 void set_date_time(const ComType com, const SetDateTime *data) {
+	BrickletAPI *ba = BA;
+
 	if (data->year < 2000 || data->year > 2099 ||
 	    data->month < 1 || data->month > 12 ||
 	    data->day < 1 || data->day > 31 ||
@@ -270,7 +263,7 @@ void set_date_time(const ComType com, const SetDateTime *data) {
 	    data->second > 59 ||
 	    data->centisecond > 99 ||
 	    data->weekday < 1 || data->weekday > 7) {
-		BA->com_return_error(data, sizeof(MessageHeader), MESSAGE_ERROR_CODE_INVALID_PARAMETER, com);
+		ba->com_return_error(data, sizeof(MessageHeader), MESSAGE_ERROR_CODE_INVALID_PARAMETER, com);
 		return;
 	}
 
@@ -295,7 +288,7 @@ void set_date_time(const ComType com, const SetDateTime *data) {
 	// Start clock
 	write_register(REG_STOP_ENABLE, REG_STOP_ENABLE_STOP_DISABLED);
 
-	BA->com_return_setter(com, data);
+	ba->com_return_setter(com, data);
 }
 
 void get_date_time(const ComType com, const GetDateTime *data) {
@@ -324,18 +317,21 @@ void get_timestamp(const ComType com, const GetTimestamp *data) {
 }
 
 void set_offset(const ComType com, const SetOffset *data) {
-	BC->calibration[2] = data->offset;
+	BrickletAPI *ba = BA;
+	BrickContext *bc = BC;
 
-	write_register(REG_OFFSET, BC->calibration[2]);
+	bc->calibration[2] = data->offset;
 
-	BA->bricklet_select(BS->port - 'a');
-	BA->i2c_eeprom_master_write(BA->twid->pTwi,
+	write_register(REG_OFFSET, bc->calibration[2]);
+
+	ba->bricklet_select(BS->port - 'a');
+	ba->i2c_eeprom_master_write(ba->twid->pTwi,
 	                            CALIBRATION_EEPROM_POSITION,
-	                            (const char*)BC->calibration,
-	                            sizeof(BC->calibration));
-	BA->bricklet_deselect(BS->port - 'a');
+	                            (const char*)bc->calibration,
+	                            sizeof(bc->calibration));
+	ba->bricklet_deselect(BS->port - 'a');
 
-	BA->com_return_setter(com, data);
+	ba->com_return_setter(com, data);
 }
 
 void get_offset(const ComType com, const GetOffset *data) {
@@ -364,23 +360,9 @@ void get_date_time_callback_period(const ComType com, const GetDateTimeCallbackP
 	BA->send_blocking_with_timeout(&gdtcpr, sizeof(gdtcpr), com);
 }
 
-void set_timestamp_callback_period(const ComType com, const SetTimestampCallbackPeriod *data) {
-	BC->period_timestamp = data->period;
-
-	BA->com_return_setter(com, data);
-}
-
-void get_timestamp_callback_period(const ComType com, const GetTimestampCallbackPeriod *data) {
-	GetTimestampCallbackPeriodReturn gtcpr;
-
-	gtcpr.header         = data->header;
-	gtcpr.header.length  = sizeof(gtcpr);
-	gtcpr.period         = BC->period_timestamp;
-
-	BA->send_blocking_with_timeout(&gtcpr, sizeof(gtcpr), com);
-}
-
 void set_alarm(const ComType com, const SetAlarm *data) {
+	BrickletAPI *ba = BA;
+
 #if 0
 	// FIXME: this would be the classic way of parameter checking, but with
 	//        this GCC misscompiles the code. therefore, parameter checking is
@@ -391,11 +373,12 @@ void set_alarm(const ComType com, const SetAlarm *data) {
 	    (data->minute != -1 && (data->minute < 0 || data->minute > 59)) ||
 	    (data->second != -1 && (data->second < 0 || data->second > 59)) ||
 	    (data->weekday != -1 && (data->weekday < 1 || data->weekday > 7))) {
-		BA->com_return_error(data, sizeof(MessageHeader), MESSAGE_ERROR_CODE_INVALID_PARAMETER, com);
+		ba->com_return_error(data, sizeof(MessageHeader), MESSAGE_ERROR_CODE_INVALID_PARAMETER, com);
 		return;
 	}
 #endif
 
+	// Prepare alarm register values
 	uint8_t bytes[9] = {0};
 	bool invalid = false;
 
@@ -441,9 +424,37 @@ void set_alarm(const ComType com, const SetAlarm *data) {
 		invalid = true;
 	}
 
+	if (data->interval < -1) {
+		invalid = true;
+	}
+
 	if (invalid) {
-		BA->com_return_error(data, sizeof(MessageHeader), MESSAGE_ERROR_CODE_INVALID_PARAMETER, com);
+		ba->com_return_error(data, sizeof(MessageHeader), MESSAGE_ERROR_CODE_INVALID_PARAMETER, com);
 		return;
+	}
+
+	BC->interval = data->interval;
+
+	if (bytes[8] == 0 && data->interval >= 0) {
+		DateTimeFields fields;
+
+		read_date_time(&fields);
+
+		if (add_seconds(&fields, data->interval)) {
+			bytes[0] = bin2bcd(fields.second);
+			bytes[1] = bin2bcd(fields.minute);
+			bytes[2] = bin2bcd(fields.hour);
+			bytes[3] = bin2bcd(fields.day);
+			bytes[4] = bin2bcd(fields.month);
+
+			bytes[8] = REG_RTC_ALARM_ENABLE_A1E_MONTH |
+			           REG_RTC_ALARM_ENABLE_A1E_DAY |
+			           REG_RTC_ALARM_ENABLE_A1E_HOUR |
+			           REG_RTC_ALARM_ENABLE_A1E_MINUTE |
+			           REG_RTC_ALARM_ENABLE_A1E_SECOND;
+		} else {
+			bytes[8] = 0;
+		}
 	}
 
 	// Clear alarm enable bits
@@ -453,9 +464,11 @@ void set_alarm(const ComType com, const SetAlarm *data) {
 	write_register(REG_FLAGS, 0);
 
 	// Set alarm and enable bits
-	write_registers(REG_RTC_ALARM1_SECOND, bytes, 9);
+	if (bytes[8] != 0) {
+		write_registers(REG_RTC_ALARM1_SECOND, bytes, 9);
+	}
 
-	BA->com_return_setter(com, data);
+	ba->com_return_setter(com, data);
 }
 
 void get_alarm(const ComType com, const GetAlarm *data) {
@@ -507,6 +520,8 @@ void get_alarm(const ComType com, const GetAlarm *data) {
 	} else {
 		gar.weekday = -1;
 	}
+
+	gar.interval = BC->interval;
 
 	BA->send_blocking_with_timeout(&gar, sizeof(gar), com);
 }
@@ -610,6 +625,80 @@ int64_t calculate_timestamp(DateTimeFields *fields) {
 	int64_t days_before_this_month = days_before_this_month_table[fields->month - 1] + (fields->month > 2 && year % 4 == 0 ? 1 : 0);
 
 	return (((((days_before_this_year + days_before_this_month + fields->day - 1) * 24 + fields->hour) * 60 + fields->minute) * 60) + fields->second) * 1000 + fields->centisecond * 10;
+}
+
+static const uint8_t days_in_this_month_table[12] = {
+	31,
+	28,
+	31,
+	30,
+	31,
+	30,
+	31,
+	31,
+	30,
+	31,
+	30,
+	31
+};
+
+bool add_seconds(DateTimeFields *fields, int32_t seconds) {
+	fields->second += seconds % 60;
+
+	if (fields->second > 59) {
+		fields->second -= 60;
+		++fields->minute;
+	}
+
+	int32_t minutes = seconds / 60;
+	fields->minute += minutes % 60;
+
+	if (fields->minute > 59) {
+		fields->minute -= 60;
+		++fields->hour;
+	}
+
+	int32_t hours = minutes / 60;
+	fields->hour += hours % 24;
+
+	if (fields->hour > 23) {
+		fields->hour -= 24;
+		++fields->day;
+	}
+
+	int32_t days = hours / 24;
+	uint8_t days_in_this_month = days_in_this_month_table[fields->month - 1];
+
+	if (fields->month == 2 && fields->year % 4 == 0) {
+		++days_in_this_month;
+	}
+
+	while (fields->day + days > days_in_this_month) {
+		days -= days_in_this_month - fields->day + 1;
+
+		fields->day = 1;
+		++fields->month;
+
+		if (fields->month == 13) {
+			fields->month = 1;
+
+			if (fields->year == 2099) {
+				return false;
+			}
+
+			++fields->year;
+		}
+
+		days_in_this_month = days_in_this_month_table[fields->month - 1];
+
+		if (fields->month == 2 && fields->year % 4 == 0) {
+			++days_in_this_month;
+		}
+	}
+
+	fields->day += days;
+
+	return true;
 }
 
 bool i2c_scl_value(void) {

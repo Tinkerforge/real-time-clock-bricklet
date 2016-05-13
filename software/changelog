@@ -1,3 +1,7 @@
 2016-02-10: 2.0.0 (faebb25)
 - Initial version
 
+2016-05-13: 2.0.1 (<unknown>)
+- Restore calibration correctly after reset
+- Add date/time callback
+- Add configurable alarm function
