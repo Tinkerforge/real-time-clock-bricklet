@@ -217,7 +217,7 @@ void tick(const uint8_t tick_type) {
 				read_date_time(&a.fields);
 				a.timestamp = calculate_timestamp(&a.fields);
 
-				if (bc->interval >= 0) {
+				if (bc->interval > 0) {
 					DateTimeFields fields = a.fields;
 					uint8_t bytes[9];
 
@@ -372,7 +372,8 @@ void set_alarm(const ComType com, const SetAlarm *data) {
 	    (data->hour != -1 && (data->hour < 0 || data->hour > 23)) ||
 	    (data->minute != -1 && (data->minute < 0 || data->minute > 59)) ||
 	    (data->second != -1 && (data->second < 0 || data->second > 59)) ||
-	    (data->weekday != -1 && (data->weekday < 1 || data->weekday > 7))) {
+	    (data->weekday != -1 && (data->weekday < 1 || data->weekday > 7)) ||
+	    (data->interval != -1 && data->interval == 0) {
 		ba->com_return_error(data, sizeof(MessageHeader), MESSAGE_ERROR_CODE_INVALID_PARAMETER, com);
 		return;
 	}
@@ -424,7 +425,7 @@ void set_alarm(const ComType com, const SetAlarm *data) {
 		invalid = true;
 	}
 
-	if (data->interval < -1) {
+	if (data->interval == 0 || data->interval < -1) {
 		invalid = true;
 	}
 
@@ -435,7 +436,7 @@ void set_alarm(const ComType com, const SetAlarm *data) {
 
 	BC->interval = data->interval;
 
-	if (bytes[8] == 0 && data->interval >= 0) {
+	if (bytes[8] == 0 && data->interval > 0) {
 		DateTimeFields fields;
 
 		read_date_time(&fields);
