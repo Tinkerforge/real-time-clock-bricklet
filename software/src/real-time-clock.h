@@ -189,7 +189,6 @@ void i2c_sda_low(void);
 void i2c_sleep_halfclock(void);
 void i2c_stop(void);
 void i2c_start(void);
-void i2c_foobar(bool high);
 uint8_t i2c_recv_byte(bool ack);
 bool i2c_send_byte(const uint8_t value);
 
