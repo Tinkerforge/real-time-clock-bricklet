@@ -1,0 +1,39 @@
+Needs["NETLink`"]
+LoadNETAssembly["Tinkerforge",NotebookDirectory[]<>"../../.."]
+
+host="localhost"
+port=4223
+uid="XYZ"(*Change to your UID*)
+
+(*Create IPConnection and device object*)
+ipcon=NETNew["Tinkerforge.IPConnection"]
+rtc=NETNew["Tinkerforge.BrickletRealTimeClock",uid,ipcon]
+ipcon@Connect[host,port]
+
+(*Callback function for date and time callback*)
+DateTimeCB[sender_,year_,month_,day_,hour_,minute_,second_,centisecond_,weekday_,timestamp_]:=
+ Module[{},
+  Print["Year: "<>ToString[year]];
+  Print["Month: "<>ToString[month]];
+  Print["Day: "<>ToString[day]];
+  Print["Hour: "<>ToString[hour]];
+  Print["Minute: "<>ToString[minute]];
+  Print["Second: "<>ToString[second]];
+  Print["Centisecond: "<>ToString[centisecond]];
+  Print["Weekday: "<>ToString[weekday]];
+  Print["Timestamp: "<>ToString[timestamp]]
+ ]
+
+AddEventHandler[rtc@DateTime,DateTimeCB]
+
+(*Set period for date and time callback to 5s (5000ms)*)
+(*Note: The date and time callback is only called every 5 seconds*)
+(*if the date and time has changed since the last call!*)
+rtc@SetDateTimeCallbackPeriod[5000]
+
+Input["Click OK to exit"]
+
+(*Clean up*)
+ipcon@Disconnect[]
+ReleaseNETObject[rtc]
+ReleaseNETObject[ipcon]

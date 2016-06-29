@@ -17,7 +17,8 @@ class Example
 
 		// Get current date and time
 		int year; byte month, day, hour, minute, second, centisecond, weekday;
-		rtc.GetDateTime(out year, out month, out day, out hour, out minute, out second, out centisecond, out weekday);
+		rtc.GetDateTime(out year, out month, out day, out hour, out minute, out second,
+		                out centisecond, out weekday);
 
 		Console.WriteLine("Year: " + year);
 		Console.WriteLine("Month: " + month);

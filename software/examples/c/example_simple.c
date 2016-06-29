@@ -26,7 +26,8 @@ int main(void) {
 
 	// Get current date and time
 	uint16_t year; uint8_t month, day, hour, minute, second, centisecond, weekday;
-	if(real_time_clock_get_date_time(&rtc, &year, &month, &day, &hour, &minute, &second, &centisecond, &weekday) < 0) {
+	if(real_time_clock_get_date_time(&rtc, &year, &month, &day, &hour, &minute, &second,
+	                                 &centisecond, &weekday) < 0) {
 		fprintf(stderr, "Could not get date and time, probably timeout\n");
 		return 1;
 	}
