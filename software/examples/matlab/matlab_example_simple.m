@@ -4,7 +4,7 @@ function matlab_example_simple()
 
     HOST = 'localhost';
     PORT = 4223;
-    UID = 'XYZ'; % Change to your UID
+    UID = 'XYZ'; % Change XYZ to the UID of your Real-Time Clock Bricklet
 
     ipcon = IPConnection(); % Create IP connection
     rtc = handle(BrickletRealTimeClock(UID, ipcon), 'CallbackProperties'); % Create device object

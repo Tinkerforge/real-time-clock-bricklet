@@ -4,13 +4,14 @@ Imports Tinkerforge
 Module ExampleCallback
     Const HOST As String = "localhost"
     Const PORT As Integer = 4223
-    Const UID As String = "XYZ" ' Change to your UID
+    Const UID As String = "XYZ" ' Change XYZ to the UID of your Real-Time Clock Bricklet
 
     ' Callback subroutine for date and time callback
     Sub DateTimeCB(ByVal sender As BrickletRealTimeClock, ByVal year As Integer, _
                    ByVal month As Byte, ByVal day As Byte, ByVal hour As Byte, _
-                   ByVal minute As Byte, ByVal second As Byte, ByVal centisecond As Byte, _
-                   ByVal weekday As Byte, ByVal timestamp As Long)
+                   ByVal minute As Byte, ByVal second As Byte, _
+                   ByVal centisecond As Byte, ByVal weekday As Byte, _
+                   ByVal timestamp As Long)
         Console.WriteLine("Year: " + year.ToString())
         Console.WriteLine("Month: " + month.ToString())
         Console.WriteLine("Day: " + day.ToString())

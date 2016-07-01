@@ -4,7 +4,9 @@ import com.tinkerforge.BrickletRealTimeClock;
 public class ExampleCallback {
 	private static final String HOST = "localhost";
 	private static final int PORT = 4223;
-	private static final String UID = "XYZ"; // Change to your UID
+
+	// Change XYZ to the UID of your Real-Time Clock Bricklet
+	private static final String UID = "XYZ";
 
 	// Note: To make the example code cleaner we do not handle exceptions. Exceptions
 	//       you might normally want to catch are described in the documentation
@@ -17,8 +19,9 @@ public class ExampleCallback {
 
 		// Add date and time listener
 		rtc.addDateTimeListener(new BrickletRealTimeClock.DateTimeListener() {
-			public void dateTime(int year, short month, short day, short hour, short minute,
-			                     short second, short centisecond, short weekday, long timestamp) {
+			public void dateTime(int year, short month, short day, short hour,
+			                     short minute, short second, short centisecond,
+			                     short weekday, long timestamp) {
 				System.out.println("Year: " + year);
 				System.out.println("Month: " + month);
 				System.out.println("Day: " + day);

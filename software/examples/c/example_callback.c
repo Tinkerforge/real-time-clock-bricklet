@@ -6,7 +6,7 @@
 
 #define HOST "localhost"
 #define PORT 4223
-#define UID "XYZ" // Change to your UID
+#define UID "XYZ" // Change XYZ to the UID of your Real-Time Clock Bricklet
 
 // Callback function for date and time callback
 void cb_date_time(uint16_t year, uint8_t month, uint8_t day, uint8_t hour, uint8_t minute,

@@ -12,24 +12,26 @@ type
     ipcon: TIPConnection;
     rtc: TBrickletRealTimeClock;
   public
-    procedure DateTimeCB(sender: TBrickletRealTimeClock; const year: word; const month: byte;
-                         const day: byte; const hour: byte; const minute: byte; const second: byte;
-                         const centisecond: byte; const weekday: byte; const timestamp: int64);
+    procedure DateTimeCB(sender: TBrickletRealTimeClock; const year: word;
+                         const month: byte; const day: byte; const hour: byte;
+                         const minute: byte; const second: byte; const centisecond: byte;
+                         const weekday: byte; const timestamp: int64);
     procedure Execute;
   end;
 
 const
   HOST = 'localhost';
   PORT = 4223;
-  UID = 'XYZ'; { Change to your UID }
+  UID = 'XYZ'; { Change XYZ to the UID of your Real-Time Clock Bricklet }
 
 var
   e: TExample;
 
 { Callback procedure for date and time callback }
-procedure TExample.DateTimeCB(sender: TBrickletRealTimeClock; const year: word; const month: byte;
-                              const day: byte; const hour: byte; const minute: byte;
-                              const second: byte; const centisecond: byte; const weekday: byte;
+procedure TExample.DateTimeCB(sender: TBrickletRealTimeClock; const year: word;
+                              const month: byte; const day: byte; const hour: byte;
+                              const minute: byte; const second: byte;
+                              const centisecond: byte; const weekday: byte;
                               const timestamp: int64);
 begin
   WriteLn(Format('Year: %d', [year]));

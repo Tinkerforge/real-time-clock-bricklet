@@ -8,7 +8,7 @@ include Tinkerforge
 
 HOST = 'localhost'
 PORT = 4223
-UID = 'XYZ' # Change to your UID
+UID = 'XYZ' # Change XYZ to the UID of your Real-Time Clock Bricklet
 
 ipcon = IPConnection.new # Create IP connection
 rtc = BrickletRealTimeClock.new UID, ipcon # Create device object
@@ -17,8 +17,10 @@ ipcon.connect HOST, PORT # Connect to brickd
 # Don't use device before ipcon is connected
 
 # Register date and time callback
-rtc.register_callback(BrickletRealTimeClock::CALLBACK_DATE_TIME) do |year, month, day, hour, \
-                                                                     minute, second, centisecond, \
+rtc.register_callback(BrickletRealTimeClock::CALLBACK_DATE_TIME) do |year, month, day, \
+                                                                     hour, minute, \
+                                                                     second, \
+                                                                     centisecond, \
                                                                      weekday, timestamp|
   puts "Year: #{year}"
   puts "Month: #{month}"

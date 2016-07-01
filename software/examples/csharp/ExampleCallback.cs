@@ -5,11 +5,12 @@ class Example
 {
 	private static string HOST = "localhost";
 	private static int PORT = 4223;
-	private static string UID = "XYZ"; // Change to your UID
+	private static string UID = "XYZ"; // Change XYZ to the UID of your Real-Time Clock Bricklet
 
 	// Callback function for date and time callback
-	static void DateTimeCB(BrickletRealTimeClock sender, int year, byte month, byte day, byte hour,
-	                       byte minute, byte second, byte centisecond, byte weekday, long timestamp)
+	static void DateTimeCB(BrickletRealTimeClock sender, int year, byte month, byte day,
+	                       byte hour, byte minute, byte second, byte centisecond,
+	                       byte weekday, long timestamp)
 	{
 		Console.WriteLine("Year: " + year);
 		Console.WriteLine("Month: " + month);

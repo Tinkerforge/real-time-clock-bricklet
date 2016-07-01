@@ -5,7 +5,7 @@ use Tinkerforge::BrickletRealTimeClock;
 
 use constant HOST => 'localhost';
 use constant PORT => 4223;
-use constant UID => 'XYZ'; # Change to your UID
+use constant UID => 'XYZ'; # Change XYZ to the UID of your Real-Time Clock Bricklet
 
 # Callback subroutine for date and time callback
 sub cb_date_time
