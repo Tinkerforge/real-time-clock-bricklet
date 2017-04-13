@@ -33,7 +33,7 @@ class Example
 		// Don't use device before ipcon is connected
 
 		// Register date and time callback to function DateTimeCB
-		rtc.DateTime += DateTimeCB;
+		rtc.DateTimeCallback += DateTimeCB;
 
 		// Set period for date and time callback to 5s (5000ms)
 		// Note: The date and time callback is only called every 5 seconds
