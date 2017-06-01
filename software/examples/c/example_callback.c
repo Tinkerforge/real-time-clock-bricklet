@@ -1,3 +1,5 @@
+#define __STDC_FORMAT_MACROS // for PRId64 in C++
+
 #include <stdio.h>
 #include <inttypes.h>
 
