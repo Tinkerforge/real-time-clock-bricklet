@@ -24,7 +24,7 @@ void cb_date_time(uint16_t year, uint8_t month, uint8_t day, uint8_t hour, uint8
 	printf("Second: %d\n", second);
 	printf("Centisecond: %d\n", centisecond);
 	printf("Weekday: %d\n", weekday);
-	printf("Timestamp: %"PRId64"\n", timestamp);
+	printf("Timestamp: %" PRId64 "\n", timestamp);
 	printf("\n");
 }
 

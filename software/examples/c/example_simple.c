@@ -50,7 +50,7 @@ int main(void) {
 		return 1;
 	}
 
-	printf("Timestamp: %"PRId64" ms\n", timestamp);
+	printf("Timestamp: %" PRId64 " ms\n", timestamp);
 
 	printf("Press key to exit\n");
 	getchar();
