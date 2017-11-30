@@ -17,11 +17,10 @@ ipcon.connect HOST, PORT # Connect to brickd
 # Don't use device before ipcon is connected
 
 # Register date and time callback
-rtc.register_callback(BrickletRealTimeClock::CALLBACK_DATE_TIME) do |year, month, day, \
-                                                                     hour, minute, \
-                                                                     second, \
-                                                                     centisecond, \
-                                                                     weekday, timestamp|
+rtc.register_callback(BrickletRealTimeClock::CALLBACK_DATE_TIME) do |year, month, day,
+                                                                     hour, minute, second,
+                                                                     centisecond, weekday,
+                                                                     timestamp|
   puts "Year: #{year}"
   puts "Month: #{month}"
   puts "Day: #{day}"

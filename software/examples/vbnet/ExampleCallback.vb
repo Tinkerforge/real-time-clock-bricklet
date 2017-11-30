@@ -32,7 +32,7 @@ Module ExampleCallback
         ' Don't use device before ipcon is connected
 
         ' Register date and time callback to subroutine DateTimeCB
-        AddHandler rtc.DateTime, AddressOf DateTimeCB
+        AddHandler rtc.DateTimeCallback, AddressOf DateTimeCB
 
         ' Set period for date and time callback to 5s (5000ms)
         ' Note: The date and time callback is only called every 5 seconds

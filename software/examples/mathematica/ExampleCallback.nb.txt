@@ -11,7 +11,8 @@ rtc=NETNew["Tinkerforge.BrickletRealTimeClock",uid,ipcon]
 ipcon@Connect[host,port]
 
 (*Callback function for date and time callback*)
-DateTimeCB[sender_,year_,month_,day_,hour_,minute_,second_,centisecond_,weekday_,timestamp_]:=
+DateTimeCB[sender_,year_,month_,day_,hour_,minute_,second_,centisecond_,weekday_,
+           timestamp_]:=
  Module[{},
   Print["Year: "<>ToString[year]];
   Print["Month: "<>ToString[month]];
@@ -24,7 +25,7 @@ DateTimeCB[sender_,year_,month_,day_,hour_,minute_,second_,centisecond_,weekday_
   Print["Timestamp: "<>ToString[timestamp]]
  ]
 
-AddEventHandler[rtc@DateTime,DateTimeCB]
+AddEventHandler[rtc@DateTimeCallback,DateTimeCB]
 
 (*Set period for date and time callback to 5s (5000ms)*)
 (*Note: The date and time callback is only called every 5 seconds*)

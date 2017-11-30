@@ -10,7 +10,8 @@ use constant UID => 'XYZ'; # Change XYZ to the UID of your Real-Time Clock Brick
 # Callback subroutine for date and time callback
 sub cb_date_time
 {
-    my ($year, $month, $day, $hour, $minute, $second, $centisecond, $weekday, $timestamp) = @_;
+    my ($year, $month, $day, $hour, $minute, $second, $centisecond, $weekday,
+        $timestamp) = @_;
 
     print "Year: $year\n";
     print "Month: $month\n";
