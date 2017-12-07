@@ -1,145 +1,48 @@
-(* Content-type: application/vnd.wolfram.mathematica *)
-
-(*** Wolfram Notebook File ***)
-(* http://www.wolfram.com/nb *)
-
-(* CreatedBy='Mathematica 9.0' *)
-
-(*CacheID: 234*)
-(* Internal cache information:
-NotebookFileLineBreakTest
-NotebookFileLineBreakTest
-NotebookDataPosition[       157,          7]
-NotebookDataLength[      4571,        135]
-NotebookOptionsPosition[      4298,        121]
-NotebookOutlinePosition[      4636,        136]
-CellTagsIndexPosition[      4593,        133]
-WindowFrame->Normal*)
-
-(* Beginning of Notebook Content *)
 Notebook[{
-Cell[BoxData[{
- RowBox[{"Needs", "[", "\"\<NETLink`\>\"", "]"}], "\n", 
- RowBox[{"LoadNETAssembly", "[", 
-  RowBox[{"\"\<Tinkerforge\>\"", ",", 
-   RowBox[{
-    RowBox[{"NotebookDirectory", "[", "]"}], "<>", "\"\<../../..\>\""}]}], 
-  "]"}]}], "Input",
- CellChangeTimes->{{3.662991173245709*^9, 3.66299117324781*^9}}],
-
-Cell[BoxData[{
- RowBox[{"host", "=", "\"\<localhost\>\""}], "\n", 
- RowBox[{"port", "=", "4223"}], "\n", 
- RowBox[{
-  RowBox[{"uid", "=", "\"\<XYZ\>\""}], 
-  RowBox[{"(*", 
-   RowBox[{"Change", " ", "to", " ", "your", " ", "UID"}], "*)"}], 
-  "\[IndentingNewLine]", "\n", 
-  RowBox[{"(*", 
-   RowBox[{
-   "Create", " ", "IPConnection", " ", "and", " ", "device", " ", "object"}], 
-   "*)"}]}], "\[IndentingNewLine]", 
- RowBox[{"ipcon", "=", 
-  RowBox[{"NETNew", "[", "\"\<Tinkerforge.IPConnection\>\"", "]"}]}], "\n", 
- RowBox[{"rtc", "=", 
-  RowBox[{"NETNew", "[", 
-   RowBox[{
-   "\"\<Tinkerforge.BrickletRealTimeClock\>\"", ",", "uid", ",", "ipcon"}], 
-   "]"}]}], "\n", 
- RowBox[{
-  RowBox[{"ipcon", "@", 
-   RowBox[{"Connect", "[", 
-    RowBox[{"host", ",", "port"}], "]"}]}], "\n"}], "\[IndentingNewLine]", 
- RowBox[{
-  RowBox[{
-   RowBox[{"year", "=", "0"}], ";", 
-   RowBox[{"month", "=", "0"}], ";", 
-   RowBox[{"day", "=", "0"}], ";", 
-   RowBox[{"hour", "=", "0"}], ";", 
-   RowBox[{"minute", "=", "0"}], ";", 
-   RowBox[{"second", "=", "0"}], ";", 
-   RowBox[{"centisecond", "=", "0"}], ";", 
-   RowBox[{"weekday", "=", "0"}]}], "\[IndentingNewLine]", "\n", 
-  RowBox[{"(*", 
-   RowBox[{"Get", " ", "current", " ", "date", " ", "and", " ", "time"}], 
-   "*)"}]}], "\[IndentingNewLine]", 
- RowBox[{
-  RowBox[{"rtc", "@", 
-   RowBox[{"GetDateTime", "[", 
-    RowBox[{
-    "year", ",", "month", ",", "day", ",", "hour", ",", "minute", ",", 
-     "second", ",", "centisecond", ",", "weekday"}], "]"}]}], 
-  "\n"}], "\[IndentingNewLine]", 
- RowBox[{"Print", "[", 
-  RowBox[{"\"\<Year: \>\"", "<>", 
-   RowBox[{"ToString", "[", "year", "]"}]}], "]"}], "\n", 
- RowBox[{"Print", "[", 
-  RowBox[{"\"\<Month: \>\"", "<>", 
-   RowBox[{"ToString", "[", "month", "]"}]}], "]"}], "\n", 
- RowBox[{"Print", "[", 
-  RowBox[{"\"\<Day: \>\"", "<>", 
-   RowBox[{"ToString", "[", "day", "]"}]}], "]"}], "\n", 
- RowBox[{"Print", "[", 
-  RowBox[{"\"\<Hour: \>\"", "<>", 
-   RowBox[{"ToString", "[", "hour", "]"}]}], "]"}], "\n", 
- RowBox[{"Print", "[", 
-  RowBox[{"\"\<Minute: \>\"", "<>", 
-   RowBox[{"ToString", "[", "minute", "]"}]}], "]"}], "\n", 
- RowBox[{"Print", "[", 
-  RowBox[{"\"\<Second: \>\"", "<>", 
-   RowBox[{"ToString", "[", "second", "]"}]}], "]"}], "\n", 
- RowBox[{"Print", "[", 
-  RowBox[{"\"\<Centisecond: \>\"", "<>", 
-   RowBox[{"ToString", "[", "centisecond", "]"}]}], "]"}], "\n", 
- RowBox[{
-  RowBox[{"Print", "[", 
-   RowBox[{"\"\<Weekday: \>\"", "<>", 
-    RowBox[{"ToString", "[", "weekday", "]"}]}], "]"}], "\[IndentingNewLine]",
-   "\n", 
-  RowBox[{"(*", 
-   RowBox[{"Get", " ", "current", " ", "timestamp", " ", 
-    RowBox[{"(", 
-     RowBox[{"unit", " ", "is", " ", "ms"}], ")"}]}], 
-   "*)"}]}], "\[IndentingNewLine]", 
- RowBox[{
-  RowBox[{"Print", "[", 
-   RowBox[{"\"\<Timestamp: \>\"", "<>", 
-    RowBox[{"ToString", "[", 
-     RowBox[{"N", "[", 
-      RowBox[{"Quantity", "[", 
-       RowBox[{
-        RowBox[{"rtc", "@", 
-         RowBox[{"GetTimestamp", "[", "]"}]}], ",", "\"\<ms\>\""}], "]"}], 
-      "]"}], "]"}]}], "]"}], "\[IndentingNewLine]", "\n", 
-  RowBox[{"(*", 
-   RowBox[{"Clean", " ", "up"}], "*)"}]}], "\[IndentingNewLine]", 
- RowBox[{"ipcon", "@", 
-  RowBox[{"Disconnect", "[", "]"}]}], "\n", 
- RowBox[{"ReleaseNETObject", "[", "rtc", "]"}], "\n", 
- RowBox[{"ReleaseNETObject", "[", "ipcon", "]"}]}], "Input",
- CellChangeTimes->{{3.6629911792557*^9, 3.662991179257806*^9}}]
-},
-WindowSize->{915, 936},
-WindowMargins->{{Automatic, 374}, {Automatic, 39}},
-FrontEndVersion->"9.0 for Linux x86 (64-bit) (November 20, 2012)",
-StyleDefinitions->"Default.nb"
-]
-(* End of Notebook Content *)
-
-(* Internal cache information *)
-(*CellTagsOutline
-CellTagsIndex->{}
-*)
-(*CellTagsIndex
-CellTagsIndex->{}
-*)
-(*NotebookFileOutline
-Notebook[{
-Cell[557, 20, 317, 7, 55, "Input"],
-Cell[877, 29, 3417, 90, 671, "Input"]
-}
-]
-*)
-
-(* End of internal cache information *)
-
+ Cell[
+  BoxData[{
+   RowBox[{"Needs", "[", "\"\<NETLink`\>\"", "]"}],
+   RowBox[{"LoadNETAssembly", "[", RowBox[{"\"\<Tinkerforge\>\"", ",", RowBox[{RowBox[{"NotebookDirectory", "[", "]"}], "<>", "\"\<../../..\>\""}]}], "]"}]
+  }], "Input"
+ ],
+ Cell[
+  BoxData[{
+   RowBox[{"host", "=", "\"\<localhost\>\""}],
+   RowBox[{"port", "=", "4223"}],
+   RowBox[{"uid", "=", "\"\<XYZ\>\"", RowBox[{"(*", "Change XYZ to the UID of your Real-Time Clock Bricklet", "*)"}]}],
+   RowBox[{"
+"}],
+   RowBox[{"(*", "Create IPConnection and device object", "*)"}],
+   RowBox[{"ipcon", "=", RowBox[{"NETNew", "[", "\"\<Tinkerforge.IPConnection\>\"", "]"}]}],
+   RowBox[{"rtc", "=", RowBox[{"NETNew", "[", RowBox[{"\"\<Tinkerforge.BrickletRealTimeClock\>\"", ",", "uid", ",", "ipcon"}], "]"}]}],
+   RowBox[{"ipcon", "@", RowBox[{"Connect", "[", RowBox[{"host", ",", "port"}], "]"}]}],
+   RowBox[{"
+"}],
+   RowBox[{"year", "=", "0", ";", "month", "=", "0", ";", "day", "=", "0", ";", "hour", "=", "0", ";", "minute", "=", "0", ";", "second", "=", "0", ";", "centisecond", "=", "0", ";", "weekday", "=", "0"}],
+   RowBox[{"
+"}],
+   RowBox[{"(*", "Get current date and time", "*)"}],
+   RowBox[{"rtc", "@", RowBox[{"GetDateTime", "[", RowBox[{"year", ",", "month", ",", "day", ",", "hour", ",", "minute", ",", "second", ",", "centisecond", ",", "weekday"}], "]"}]}],
+   RowBox[{"
+"}],
+   RowBox[{"Print", "[", RowBox[{"\"\<Year: \>\"", "<>", RowBox[{"ToString", "[", "year", "]"}]}], "]"}],
+   RowBox[{"Print", "[", RowBox[{"\"\<Month: \>\"", "<>", RowBox[{"ToString", "[", "month", "]"}]}], "]"}],
+   RowBox[{"Print", "[", RowBox[{"\"\<Day: \>\"", "<>", RowBox[{"ToString", "[", "day", "]"}]}], "]"}],
+   RowBox[{"Print", "[", RowBox[{"\"\<Hour: \>\"", "<>", RowBox[{"ToString", "[", "hour", "]"}]}], "]"}],
+   RowBox[{"Print", "[", RowBox[{"\"\<Minute: \>\"", "<>", RowBox[{"ToString", "[", "minute", "]"}]}], "]"}],
+   RowBox[{"Print", "[", RowBox[{"\"\<Second: \>\"", "<>", RowBox[{"ToString", "[", "second", "]"}]}], "]"}],
+   RowBox[{"Print", "[", RowBox[{"\"\<Centisecond: \>\"", "<>", RowBox[{"ToString", "[", "centisecond", "]"}]}], "]"}],
+   RowBox[{"Print", "[", RowBox[{"\"\<Weekday: \>\"", "<>", RowBox[{"ToString", "[", "weekday", "]"}]}], "]"}],
+   RowBox[{"
+"}],
+   RowBox[{"(*", "Get current timestamp (unit is ms)", "*)"}],
+   RowBox[{"Print", "[", RowBox[{"\"\<Timestamp: \>\"", "<>", RowBox[{"ToString", "[", RowBox[{"N", "[", RowBox[{"Quantity", "[", RowBox[{RowBox[{"rtc", "@", RowBox[{"GetTimestamp", "[", "]"}]}], ",", "\"\<ms\>\""}], "]"}], "]"}], "]"}]}], "]"}],
+   RowBox[{"
+"}],
+   RowBox[{"(*", "Clean up", "*)"}],
+   RowBox[{"ipcon", "@", RowBox[{"Disconnect", "[", "]"}]}],
+   RowBox[{"ReleaseNETObject", "[", "rtc", "]"}],
+   RowBox[{"ReleaseNETObject", "[", "ipcon", "]"}]
+  }], "Input"
+ ]
+}]
