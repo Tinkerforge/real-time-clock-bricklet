@@ -1,5 +1,5 @@
 EESchema Schematic File Version 2
-LIBS:rtc-rescue
+LIBS:tinkerforge
 LIBS:power
 LIBS:device
 LIBS:transistors
@@ -29,7 +29,6 @@ LIBS:opto
 LIBS:atmel
 LIBS:contrib
 LIBS:valves
-LIBS:tinkerforge
 LIBS:Zilog
 LIBS:Xicor
 LIBS:video
@@ -96,7 +95,7 @@ $EndDescr
 Text Notes 550  7700 0    40   ~ 0
 Copyright Tinkerforge GmbH 2015.\nThis documentation describes Open Hardware and is licensed under the\nCERN OHL v. 1.1.\nYou may redistribute and modify this documentation under the terms of the\nCERN OHL v.1.1. (http://ohwr.org/cernohl). This documentation is distributed\nWITHOUT ANY EXPRESS OR IMPLIED WARRANTY, INCLUDING OF\nMERCHANTABILITY, SATISFACTORY QUALITY AND FITNESS FOR A\nPARTICULAR PURPOSE. Please see the CERN OHL v.1.1 for applicable\nconditions\n
 $Comp
-L GND-RESCUE-rtc #PWR01
+L GND #PWR01
 U 1 1 4CE29748
 P 4700 2550
 F 0 "#PWR01" H 4700 2550 30  0001 C CNN
@@ -152,12 +151,12 @@ F 3 "" H 11000 6150 60  0001 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L C-RESCUE-rtc C2
+L C C2
 U 1 1 4C5FD6ED
 P 4500 2400
 F 0 "C2" V 4650 2400 50  0000 L CNN
 F 1 "100nF" V 4350 2400 50  0000 L CNN
-F 2 "kicad-libraries:0603E" H 4500 2400 60  0001 C CNN
+F 2 "kicad-libraries:C0603E" H 4500 2400 60  0001 C CNN
 F 3 "" H 4500 2400 60  0001 C CNN
 	1    4500 2400
 	0    -1   -1   0   
@@ -171,7 +170,7 @@ SDA
 Text GLabel 2200 2450 2    60   Output ~ 0
 SCL
 $Comp
-L GND-RESCUE-rtc #PWR02
+L GND #PWR02
 U 1 1 4C5FD34E
 P 3350 2900
 F 0 "#PWR02" H 3350 2900 30  0001 C CNN
@@ -193,7 +192,7 @@ F 3 "" H 3850 2900 60  0001 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L GND-RESCUE-rtc #PWR03
+L GND #PWR03
 U 1 1 4C5FCF5E
 P 2000 2250
 F 0 "#PWR03" H 2000 2250 30  0001 C CNN
@@ -204,7 +203,7 @@ F 3 "" H 2000 2250 60  0001 C CNN
 	0    -1   -1   0   
 $EndComp
 $Comp
-L GND-RESCUE-rtc #PWR04
+L GND #PWR04
 U 1 1 4C5FCF4F
 P 1400 3300
 F 0 "#PWR04" H 1400 3300 30  0001 C CNN
@@ -281,12 +280,12 @@ F 3 "" H 4400 4100 60  0000 C CNN
 	-1   0    0    -1  
 $EndComp
 $Comp
-L C-RESCUE-rtc C1
+L C C1
 U 1 1 56437B41
 P 3900 3950
 F 0 "C1" V 4050 3950 50  0000 L CNN
 F 1 "100nF" V 3850 3650 50  0000 L CNN
-F 2 "kicad-libraries:0603E" H 3900 3950 60  0001 C CNN
+F 2 "kicad-libraries:C0603E" H 3900 3950 60  0001 C CNN
 F 3 "" H 3900 3950 60  0001 C CNN
 	1    3900 3950
 	0    -1   -1   0   
@@ -303,7 +302,7 @@ F 3 "" H 3500 3900 60  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L GND-RESCUE-rtc #PWR07
+L GND #PWR07
 U 1 1 56437CAD
 P 4300 4000
 F 0 "#PWR07" H 4300 4000 30  0001 C CNN
@@ -331,7 +330,7 @@ Wire Wire Line
 Wire Wire Line
 	2600 4450 3550 4450
 $Comp
-L GND-RESCUE-rtc #PWR08
+L GND #PWR08
 U 1 1 56437EE9
 P 4250 4700
 F 0 "#PWR08" H 4250 4700 30  0001 C CNN
@@ -424,18 +423,18 @@ F 3 "" H 5150 5100 60  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L C-RESCUE-rtc C3
+L C C3
 U 1 1 564B5C87
 P 4750 5350
 F 0 "C3" V 4600 5250 50  0000 L CNN
 F 1 "100nF" V 4800 5050 50  0000 L CNN
-F 2 "kicad-libraries:0603E" H 4750 5350 60  0001 C CNN
+F 2 "kicad-libraries:C0603E" H 4750 5350 60  0001 C CNN
 F 3 "" H 4750 5350 60  0001 C CNN
 	1    4750 5350
 	1    0    0    -1  
 $EndComp
 $Comp
-L GND-RESCUE-rtc #PWR011
+L GND #PWR011
 U 1 1 564B5D5C
 P 4750 5700
 F 0 "#PWR011" H 4750 5700 30  0001 C CNN
@@ -446,7 +445,7 @@ F 3 "" H 4750 5700 60  0001 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L GND-RESCUE-rtc #PWR012
+L GND #PWR012
 U 1 1 564B5DAF
 P 5450 5700
 F 0 "#PWR012" H 5450 5700 30  0001 C CNN
@@ -481,7 +480,7 @@ F 3 "" H 5200 4200 60  0000 C CNN
 	0    -1   -1   0   
 $EndComp
 $Comp
-L GND-RESCUE-rtc #PWR013
+L GND #PWR013
 U 1 1 564B63DC
 P 5500 4500
 F 0 "#PWR013" H 5500 4500 30  0001 C CNN

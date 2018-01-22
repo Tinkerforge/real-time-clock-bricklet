@@ -1,4 +1,4 @@
-update=Di 26 Jan 2016 09:49:17 CET
+update=Mo 22 Jan 2018 15:31:32 CET
 version=1
 last_client=kicad
 [cvpcb]
@@ -60,9 +60,9 @@ RptLab=1
 LabSize=60
 [eeschema]
 version=1
-LibDir=kicad-libraries.pretty
+LibDir=kicad-libraries
 [eeschema/libraries]
-LibName1=rtc-rescue
+LibName1=/home/lukeler/tf/kicad-libraries/tinkerforge
 LibName2=power
 LibName3=device
 LibName4=transistors
