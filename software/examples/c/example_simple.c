@@ -1,4 +1,4 @@
-#define __STDC_FORMAT_MACROS // for PRId64 in C++
+#define __STDC_FORMAT_MACROS // for PRId64/PRIu64 in C++
 
 #include <stdio.h>
 #include <inttypes.h>
@@ -34,14 +34,14 @@ int main(void) {
 		return 1;
 	}
 
-	printf("Year: %d\n", year);
-	printf("Month: %d\n", month);
-	printf("Day: %d\n", day);
-	printf("Hour: %d\n", hour);
-	printf("Minute: %d\n", minute);
-	printf("Second: %d\n", second);
-	printf("Centisecond: %d\n", centisecond);
-	printf("Weekday: %d\n", weekday);
+	printf("Year: %u\n", year);
+	printf("Month: %u\n", month);
+	printf("Day: %u\n", day);
+	printf("Hour: %u\n", hour);
+	printf("Minute: %u\n", minute);
+	printf("Second: %u\n", second);
+	printf("Centisecond: %u\n", centisecond);
+	printf("Weekday: %u\n", weekday);
 
 	// Get current timestamp (unit is ms)
 	int64_t timestamp;
