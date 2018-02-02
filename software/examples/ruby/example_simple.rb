@@ -16,7 +16,8 @@ rtc = BrickletRealTimeClock.new UID, ipcon # Create device object
 ipcon.connect HOST, PORT # Connect to brickd
 # Don't use device before ipcon is connected
 
-# Get current date and time (returned as [year, month, day, hour, minute, second, centisecond, weekday])
+# Get current date and time as [year, month, day, hour, minute, second, centisecond,
+#                               weekday]
 date_time = rtc.get_date_time
 
 puts "Year: #{date_time[0]}"
@@ -28,7 +29,7 @@ puts "Second: #{date_time[5]}"
 puts "Centisecond: #{date_time[6]}"
 puts "Weekday: #{date_time[7]}"
 
-# Get current timestamp (unit is ms)
+# Get current timestamp
 timestamp = rtc.get_timestamp
 puts "Timestamp: #{timestamp} ms"
 

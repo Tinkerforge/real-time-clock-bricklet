@@ -43,7 +43,7 @@ int main(void) {
 	printf("Centisecond: %u\n", centisecond);
 	printf("Weekday: %u\n", weekday);
 
-	// Get current timestamp (unit is ms)
+	// Get current timestamp
 	int64_t timestamp;
 	if(real_time_clock_get_timestamp(&rtc, &timestamp) < 0) {
 		fprintf(stderr, "Could not get timestamp, probably timeout\n");

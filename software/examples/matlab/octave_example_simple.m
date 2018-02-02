@@ -23,7 +23,7 @@ function octave_example_simple()
     fprintf("Centisecond: %d\n", java2int(dateTime.centisecond));
     fprintf("Weekday: %d\n", java2int(dateTime.weekday));
 
-    % Get current timestamp (unit is ms)
+    % Get current timestamp
     timestamp = rtc.getTimestamp();
     fprintf("Timestamp: %d ms\n", java2int(timestamp));
 

@@ -30,7 +30,7 @@ public class ExampleSimple {
 		System.out.println("Centisecond: " + dateTime.centisecond);
 		System.out.println("Weekday: " + dateTime.weekday);
 
-		// Get current timestamp (unit is ms)
+		// Get current timestamp
 		long timestamp = rtc.getTimestamp(); // Can throw com.tinkerforge.TimeoutException
 		System.out.println("Timestamp: " + timestamp + " ms");
 

@@ -24,7 +24,7 @@ function matlab_example_simple()
     fprintf('Centisecond: %i\n', dateTime.centisecond);
     fprintf('Weekday: %i\n', dateTime.weekday);
 
-    % Get current timestamp (unit is ms)
+    % Get current timestamp
     timestamp = rtc.getTimestamp();
     fprintf('Timestamp: %i ms\n', timestamp);
 

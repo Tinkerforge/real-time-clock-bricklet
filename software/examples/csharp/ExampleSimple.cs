@@ -29,7 +29,7 @@ class Example
 		Console.WriteLine("Centisecond: " + centisecond);
 		Console.WriteLine("Weekday: " + weekday);
 
-		// Get current timestamp (unit is ms)
+		// Get current timestamp
 		long timestamp = rtc.GetTimestamp();
 		Console.WriteLine("Timestamp: " + timestamp + " ms");
 

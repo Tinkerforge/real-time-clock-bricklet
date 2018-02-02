@@ -24,7 +24,7 @@ Print["Second: "<>ToString[second]]
 Print["Centisecond: "<>ToString[centisecond]]
 Print["Weekday: "<>ToString[weekday]]
 
-(*Get current timestamp (unit is ms)*)
+(*Get current timestamp*)
 Print["Timestamp: "<>ToString[N[Quantity[rtc@GetTimestamp[],"ms"]]]]
 
 (*Clean up*)

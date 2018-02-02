@@ -15,13 +15,7 @@ Module ExampleSimple
 
         ' Get current date and time
         Dim year As Integer
-        Dim month As Byte
-        Dim day As Byte
-        Dim hour As Byte
-        Dim minute As Byte
-        Dim second As Byte
-        Dim centisecond As Byte
-        Dim weekday As Byte
+        Dim month, day, hour, minute, second, centisecond, weekday As Byte
 
         rtc.GetDateTime(year, month, day, hour, minute, second, centisecond, weekday)
 
@@ -34,7 +28,7 @@ Module ExampleSimple
         Console.WriteLine("Centisecond: " + centisecond.ToString())
         Console.WriteLine("Weekday: " + weekday.ToString())
 
-        ' Get current timestamp (unit is ms)
+        ' Get current timestamp
         Dim timestamp As Long = rtc.GetTimestamp()
         Console.WriteLine("Timestamp: " + timestamp.ToString() + " ms")
 

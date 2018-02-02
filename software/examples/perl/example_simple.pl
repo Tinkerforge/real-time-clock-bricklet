@@ -25,7 +25,7 @@ print "Second: $second\n";
 print "Centisecond: $centisecond\n";
 print "Weekday: $weekday\n";
 
-# Get current timestamp (unit is ms)
+# Get current timestamp
 my $timestamp = $rtc->get_timestamp();
 print "Timestamp: $timestamp ms\n";
 

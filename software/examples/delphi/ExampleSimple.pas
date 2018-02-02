@@ -24,7 +24,8 @@ var
   e: TExample;
 
 procedure TExample.Execute;
-var year: word; month, day, hour, minute, second, centisecond, weekday: byte; timestamp: int64;
+var year: word; month, day, hour, minute, second, centisecond, weekday: byte;
+    timestamp: int64;
 begin
   { Create IP connection }
   ipcon := TIPConnection.Create;
@@ -48,7 +49,7 @@ begin
   WriteLn(Format('Centisecond: %d', [centisecond]));
   WriteLn(Format('Weekday: %d', [weekday]));
 
-  { Get current timestamp (unit is ms) }
+  { Get current timestamp }
   timestamp := rtc.GetTimestamp;
   WriteLn(Format('Timestamp: %d ms', [timestamp]));
 

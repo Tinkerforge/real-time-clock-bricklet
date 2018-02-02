@@ -33,7 +33,7 @@ ipcon.on(Tinkerforge.IPConnection.CALLBACK_CONNECTED,
             }
         );
 
-        // Get current timestamp (unit is ms)
+        // Get current timestamp
         rtc.getTimestamp(
             function (timestamp) {
                 console.log('Timestamp: ' + timestamp + ' ms');

@@ -35,7 +35,7 @@ Notebook[{
    RowBox[{"Print", "[", RowBox[{"\"\<Weekday: \>\"", "<>", RowBox[{"ToString", "[", "weekday", "]"}]}], "]"}],
    RowBox[{"
 "}],
-   RowBox[{"(*", "Get current timestamp (unit is ms)", "*)"}],
+   RowBox[{"(*", "Get current timestamp", "*)"}],
    RowBox[{"Print", "[", RowBox[{"\"\<Timestamp: \>\"", "<>", RowBox[{"ToString", "[", RowBox[{"N", "[", RowBox[{"Quantity", "[", RowBox[{RowBox[{"rtc", "@", RowBox[{"GetTimestamp", "[", "]"}]}], ",", "\"\<ms\>\""}], "]"}], "]"}], "]"}]}], "]"}],
    RowBox[{"
 "}],

@@ -28,7 +28,7 @@ echo "Second: " . $date_time['second'] . "\n";
 echo "Centisecond: " . $date_time['centisecond'] . "\n";
 echo "Weekday: " . $date_time['weekday'] . "\n";
 
-// Get current timestamp (unit is ms)
+// Get current timestamp
 $timestamp = $rtc->getTimestamp();
 echo "Timestamp: $timestamp ms\n";
 

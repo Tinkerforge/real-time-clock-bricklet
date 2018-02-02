@@ -27,7 +27,7 @@ if __name__ == "__main__":
     print("Centisecond: " + str(centisecond))
     print("Weekday: " + str(weekday))
 
-    # Get current timestamp (unit is ms)
+    # Get current timestamp
     timestamp = rtc.get_timestamp()
     print("Timestamp: " + str(timestamp) + " ms")
 
