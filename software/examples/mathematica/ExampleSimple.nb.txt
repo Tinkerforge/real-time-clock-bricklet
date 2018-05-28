@@ -10,9 +10,8 @@ ipcon=NETNew["Tinkerforge.IPConnection"]
 rtc=NETNew["Tinkerforge.BrickletRealTimeClock",uid,ipcon]
 ipcon@Connect[host,port]
 
-year=0;month=0;day=0;hour=0;minute=0;second=0;centisecond=0;weekday=0
-
 (*Get current date and time*)
+year=0;month=0;day=0;hour=0;minute=0;second=0;centisecond=0;weekday=0
 rtc@GetDateTime[year,month,day,hour,minute,second,centisecond,weekday]
 
 Print["Year: "<>ToString[year]]
