@@ -23,7 +23,23 @@ void cb_date_time(uint16_t year, uint8_t month, uint8_t day, uint8_t hour, uint8
 	printf("Minute: %u\n", minute);
 	printf("Second: %u\n", second);
 	printf("Centisecond: %u\n", centisecond);
-	printf("Weekday: %u\n", weekday);
+
+	if(weekday == REAL_TIME_CLOCK_WEEKDAY_MONDAY) {
+		printf("Weekday: Monday\n");
+	} else if(weekday == REAL_TIME_CLOCK_WEEKDAY_TUESDAY) {
+		printf("Weekday: Tuesday\n");
+	} else if(weekday == REAL_TIME_CLOCK_WEEKDAY_WEDNESDAY) {
+		printf("Weekday: Wednesday\n");
+	} else if(weekday == REAL_TIME_CLOCK_WEEKDAY_THURSDAY) {
+		printf("Weekday: Thursday\n");
+	} else if(weekday == REAL_TIME_CLOCK_WEEKDAY_FRIDAY) {
+		printf("Weekday: Friday\n");
+	} else if(weekday == REAL_TIME_CLOCK_WEEKDAY_SATURDAY) {
+		printf("Weekday: Saturday\n");
+	} else if(weekday == REAL_TIME_CLOCK_WEEKDAY_SUNDAY) {
+		printf("Weekday: Sunday\n");
+	}
+
 	printf("Timestamp: %" PRId64 "\n", timestamp);
 	printf("\n");
 }

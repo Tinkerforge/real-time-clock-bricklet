@@ -21,7 +21,23 @@ function cb_dateTime($year, $month, $day, $hour, $minute, $second, $centisecond,
     echo "Minute: $minute\n";
     echo "Second: $second\n";
     echo "Centisecond: $centisecond\n";
-    echo "Weekday: $weekday\n";
+
+    if ($weekday == BrickletRealTimeClock::WEEKDAY_MONDAY) {
+        echo "Weekday: Monday\n";
+    } elseif ($weekday == BrickletRealTimeClock::WEEKDAY_TUESDAY) {
+        echo "Weekday: Tuesday\n";
+    } elseif ($weekday == BrickletRealTimeClock::WEEKDAY_WEDNESDAY) {
+        echo "Weekday: Wednesday\n";
+    } elseif ($weekday == BrickletRealTimeClock::WEEKDAY_THURSDAY) {
+        echo "Weekday: Thursday\n";
+    } elseif ($weekday == BrickletRealTimeClock::WEEKDAY_FRIDAY) {
+        echo "Weekday: Friday\n";
+    } elseif ($weekday == BrickletRealTimeClock::WEEKDAY_SATURDAY) {
+        echo "Weekday: Saturday\n";
+    } elseif ($weekday == BrickletRealTimeClock::WEEKDAY_SUNDAY) {
+        echo "Weekday: Sunday\n";
+    }
+
     echo "Timestamp: $timestamp\n";
     echo "\n";
 }

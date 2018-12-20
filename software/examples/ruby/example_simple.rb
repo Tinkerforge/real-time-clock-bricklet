@@ -27,7 +27,22 @@ puts "Hour: #{date_time[3]}"
 puts "Minute: #{date_time[4]}"
 puts "Second: #{date_time[5]}"
 puts "Centisecond: #{date_time[6]}"
-puts "Weekday: #{date_time[7]}"
+
+if date_time[7] == BrickletRealTimeClock::WEEKDAY_MONDAY
+  puts "Weekday: Monday"
+elsif date_time[7] == BrickletRealTimeClock::WEEKDAY_TUESDAY
+  puts "Weekday: Tuesday"
+elsif date_time[7] == BrickletRealTimeClock::WEEKDAY_WEDNESDAY
+  puts "Weekday: Wednesday"
+elsif date_time[7] == BrickletRealTimeClock::WEEKDAY_THURSDAY
+  puts "Weekday: Thursday"
+elsif date_time[7] == BrickletRealTimeClock::WEEKDAY_FRIDAY
+  puts "Weekday: Friday"
+elsif date_time[7] == BrickletRealTimeClock::WEEKDAY_SATURDAY
+  puts "Weekday: Saturday"
+elsif date_time[7] == BrickletRealTimeClock::WEEKDAY_SUNDAY
+  puts "Weekday: Sunday"
+end
 
 # Get current timestamp
 timestamp = rtc.get_timestamp

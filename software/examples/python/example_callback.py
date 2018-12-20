@@ -17,7 +17,22 @@ def cb_date_time(year, month, day, hour, minute, second, centisecond, weekday, t
     print("Minute: " + str(minute))
     print("Second: " + str(second))
     print("Centisecond: " + str(centisecond))
-    print("Weekday: " + str(weekday))
+
+    if weekday == BrickletRealTimeClock.WEEKDAY_MONDAY:
+        print("Weekday: Monday")
+    elif weekday == BrickletRealTimeClock.WEEKDAY_TUESDAY:
+        print("Weekday: Tuesday")
+    elif weekday == BrickletRealTimeClock.WEEKDAY_WEDNESDAY:
+        print("Weekday: Wednesday")
+    elif weekday == BrickletRealTimeClock.WEEKDAY_THURSDAY:
+        print("Weekday: Thursday")
+    elif weekday == BrickletRealTimeClock.WEEKDAY_FRIDAY:
+        print("Weekday: Friday")
+    elif weekday == BrickletRealTimeClock.WEEKDAY_SATURDAY:
+        print("Weekday: Saturday")
+    elif weekday == BrickletRealTimeClock.WEEKDAY_SUNDAY:
+        print("Weekday: Sunday")
+
     print("Timestamp: " + str(timestamp))
     print("")
 

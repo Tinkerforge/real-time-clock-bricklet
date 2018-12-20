@@ -26,7 +26,28 @@ ipcon.on(Tinkerforge.IPConnection.CALLBACK_CONNECTED,
                 console.log('Minute: ' + minute);
                 console.log('Second: ' + second);
                 console.log('Centisecond: ' + centisecond);
-                console.log('Weekday: ' + weekday);
+
+                if(weekday === Tinkerforge.BrickletRealTimeClock.WEEKDAY_MONDAY) {
+                    console.log('Weekday: Monday');
+                }
+                else if(weekday === Tinkerforge.BrickletRealTimeClock.WEEKDAY_TUESDAY) {
+                    console.log('Weekday: Tuesday');
+                }
+                else if(weekday === Tinkerforge.BrickletRealTimeClock.WEEKDAY_WEDNESDAY) {
+                    console.log('Weekday: Wednesday');
+                }
+                else if(weekday === Tinkerforge.BrickletRealTimeClock.WEEKDAY_THURSDAY) {
+                    console.log('Weekday: Thursday');
+                }
+                else if(weekday === Tinkerforge.BrickletRealTimeClock.WEEKDAY_FRIDAY) {
+                    console.log('Weekday: Friday');
+                }
+                else if(weekday === Tinkerforge.BrickletRealTimeClock.WEEKDAY_SATURDAY) {
+                    console.log('Weekday: Saturday');
+                }
+                else if(weekday === Tinkerforge.BrickletRealTimeClock.WEEKDAY_SUNDAY) {
+                    console.log('Weekday: Sunday');
+                }
             },
             function (error) {
                 console.log('Error: ' + error);

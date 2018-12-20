@@ -21,7 +21,13 @@ DateTimeCB[sender_,year_,month_,day_,hour_,minute_,second_,centisecond_,weekday_
   Print["Minute: "<>ToString[minute]];
   Print["Second: "<>ToString[second]];
   Print["Centisecond: "<>ToString[centisecond]];
-  Print["Weekday: "<>ToString[weekday]];
+  If[weekday==Tinkerforge`BrickletRealTimeClock`WEEKDAYUMONDAY,Print["Weekday: Monday"]];
+  If[weekday==Tinkerforge`BrickletRealTimeClock`WEEKDAYUTUESDAY,Print["Weekday: Tuesday"]];
+  If[weekday==Tinkerforge`BrickletRealTimeClock`WEEKDAYUWEDNESDAY,Print["Weekday: Wednesday"]];
+  If[weekday==Tinkerforge`BrickletRealTimeClock`WEEKDAYUTHURSDAY,Print["Weekday: Thursday"]];
+  If[weekday==Tinkerforge`BrickletRealTimeClock`WEEKDAYUFRIDAY,Print["Weekday: Friday"]];
+  If[weekday==Tinkerforge`BrickletRealTimeClock`WEEKDAYUSATURDAY,Print["Weekday: Saturday"]];
+  If[weekday==Tinkerforge`BrickletRealTimeClock`WEEKDAYUSUNDAY,Print["Weekday: Sunday"]];
   Print["Timestamp: "<>ToString[timestamp]]
  ]
 

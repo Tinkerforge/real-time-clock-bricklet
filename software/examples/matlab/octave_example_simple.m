@@ -21,7 +21,22 @@ function octave_example_simple()
     fprintf("Minute: %d\n", java2int(dateTime.minute));
     fprintf("Second: %d\n", java2int(dateTime.second));
     fprintf("Centisecond: %d\n", java2int(dateTime.centisecond));
-    fprintf("Weekday: %d\n", java2int(dateTime.weekday));
+
+    if java2int(dateTime.weekday) == 1
+        fprintf("Weekday: Monday\n");
+    elseif java2int(dateTime.weekday) == 2
+        fprintf("Weekday: Tuesday\n");
+    elseif java2int(dateTime.weekday) == 3
+        fprintf("Weekday: Wednesday\n");
+    elseif java2int(dateTime.weekday) == 4
+        fprintf("Weekday: Thursday\n");
+    elseif java2int(dateTime.weekday) == 5
+        fprintf("Weekday: Friday\n");
+    elseif java2int(dateTime.weekday) == 6
+        fprintf("Weekday: Saturday\n");
+    elseif java2int(dateTime.weekday) == 7
+        fprintf("Weekday: Sunday\n");
+    end
 
     % Get current timestamp
     timestamp = rtc.getTimestamp();

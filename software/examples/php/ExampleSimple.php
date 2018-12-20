@@ -26,7 +26,22 @@ echo "Hour: " . $date_time['hour'] . "\n";
 echo "Minute: " . $date_time['minute'] . "\n";
 echo "Second: " . $date_time['second'] . "\n";
 echo "Centisecond: " . $date_time['centisecond'] . "\n";
-echo "Weekday: " . $date_time['weekday'] . "\n";
+
+if ($date_time['weekday'] == BrickletRealTimeClock::WEEKDAY_MONDAY) {
+    echo "Weekday: Monday\n";
+} elseif ($date_time['weekday'] == BrickletRealTimeClock::WEEKDAY_TUESDAY) {
+    echo "Weekday: Tuesday\n";
+} elseif ($date_time['weekday'] == BrickletRealTimeClock::WEEKDAY_WEDNESDAY) {
+    echo "Weekday: Wednesday\n";
+} elseif ($date_time['weekday'] == BrickletRealTimeClock::WEEKDAY_THURSDAY) {
+    echo "Weekday: Thursday\n";
+} elseif ($date_time['weekday'] == BrickletRealTimeClock::WEEKDAY_FRIDAY) {
+    echo "Weekday: Friday\n";
+} elseif ($date_time['weekday'] == BrickletRealTimeClock::WEEKDAY_SATURDAY) {
+    echo "Weekday: Saturday\n";
+} elseif ($date_time['weekday'] == BrickletRealTimeClock::WEEKDAY_SUNDAY) {
+    echo "Weekday: Sunday\n";
+}
 
 // Get current timestamp
 $timestamp = $rtc->getTimestamp();

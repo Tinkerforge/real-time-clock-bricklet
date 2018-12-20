@@ -27,7 +27,35 @@ class Example
 		Console.WriteLine("Minute: " + minute);
 		Console.WriteLine("Second: " + second);
 		Console.WriteLine("Centisecond: " + centisecond);
-		Console.WriteLine("Weekday: " + weekday);
+
+		if(weekday == BrickletRealTimeClock.WEEKDAY_MONDAY)
+		{
+			Console.WriteLine("Weekday: Monday");
+		}
+		else if(weekday == BrickletRealTimeClock.WEEKDAY_TUESDAY)
+		{
+			Console.WriteLine("Weekday: Tuesday");
+		}
+		else if(weekday == BrickletRealTimeClock.WEEKDAY_WEDNESDAY)
+		{
+			Console.WriteLine("Weekday: Wednesday");
+		}
+		else if(weekday == BrickletRealTimeClock.WEEKDAY_THURSDAY)
+		{
+			Console.WriteLine("Weekday: Thursday");
+		}
+		else if(weekday == BrickletRealTimeClock.WEEKDAY_FRIDAY)
+		{
+			Console.WriteLine("Weekday: Friday");
+		}
+		else if(weekday == BrickletRealTimeClock.WEEKDAY_SATURDAY)
+		{
+			Console.WriteLine("Weekday: Saturday");
+		}
+		else if(weekday == BrickletRealTimeClock.WEEKDAY_SUNDAY)
+		{
+			Console.WriteLine("Weekday: Sunday");
+		}
 
 		// Get current timestamp
 		long timestamp = rtc.GetTimestamp();

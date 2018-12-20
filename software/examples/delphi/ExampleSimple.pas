@@ -47,7 +47,28 @@ begin
   WriteLn(Format('Minute: %d', [minute]));
   WriteLn(Format('Second: %d', [second]));
   WriteLn(Format('Centisecond: %d', [centisecond]));
-  WriteLn(Format('Weekday: %d', [weekday]));
+
+  if (weekday = BRICKLET_REAL_TIME_CLOCK_WEEKDAY_MONDAY) then begin
+    WriteLn('Weekday: Monday');
+  end
+  else if (weekday = BRICKLET_REAL_TIME_CLOCK_WEEKDAY_TUESDAY) then begin
+    WriteLn('Weekday: Tuesday');
+  end
+  else if (weekday = BRICKLET_REAL_TIME_CLOCK_WEEKDAY_WEDNESDAY) then begin
+    WriteLn('Weekday: Wednesday');
+  end
+  else if (weekday = BRICKLET_REAL_TIME_CLOCK_WEEKDAY_THURSDAY) then begin
+    WriteLn('Weekday: Thursday');
+  end
+  else if (weekday = BRICKLET_REAL_TIME_CLOCK_WEEKDAY_FRIDAY) then begin
+    WriteLn('Weekday: Friday');
+  end
+  else if (weekday = BRICKLET_REAL_TIME_CLOCK_WEEKDAY_SATURDAY) then begin
+    WriteLn('Weekday: Saturday');
+  end
+  else if (weekday = BRICKLET_REAL_TIME_CLOCK_WEEKDAY_SUNDAY) then begin
+    WriteLn('Weekday: Sunday');
+  end;
 
   { Get current timestamp }
   timestamp := rtc.GetTimestamp;

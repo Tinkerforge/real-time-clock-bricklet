@@ -26,7 +26,23 @@ fn main() -> Result<(), Box<dyn Error>> {
             println!("Minute: {}", date_time.minute);
             println!("Second: {}", date_time.second);
             println!("Centisecond: {}", date_time.centisecond);
-            println!("Weekday: {}", date_time.weekday);
+
+            if date_time.weekday == REAL_TIME_CLOCK_BRICKLET_WEEKDAY_MONDAY {
+                println!("Weekday: Monday");
+            } else if date_time.weekday == REAL_TIME_CLOCK_BRICKLET_WEEKDAY_TUESDAY {
+                println!("Weekday: Tuesday");
+            } else if date_time.weekday == REAL_TIME_CLOCK_BRICKLET_WEEKDAY_WEDNESDAY {
+                println!("Weekday: Wednesday");
+            } else if date_time.weekday == REAL_TIME_CLOCK_BRICKLET_WEEKDAY_THURSDAY {
+                println!("Weekday: Thursday");
+            } else if date_time.weekday == REAL_TIME_CLOCK_BRICKLET_WEEKDAY_FRIDAY {
+                println!("Weekday: Friday");
+            } else if date_time.weekday == REAL_TIME_CLOCK_BRICKLET_WEEKDAY_SATURDAY {
+                println!("Weekday: Saturday");
+            } else if date_time.weekday == REAL_TIME_CLOCK_BRICKLET_WEEKDAY_SUNDAY {
+                println!("Weekday: Sunday");
+            }
+
             println!("Timestamp: {}", date_time.timestamp);
             println!();
         }

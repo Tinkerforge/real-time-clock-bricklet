@@ -21,7 +21,36 @@ sub cb_date_time
     print "Minute: $minute\n";
     print "Second: $second\n";
     print "Centisecond: $centisecond\n";
-    print "Weekday: $weekday\n";
+
+    if ($weekday == Tinkerforge::BrickletRealTimeClock->WEEKDAY_MONDAY)
+    {
+        print "Weekday: Monday\n";
+    }
+    elsif ($weekday == Tinkerforge::BrickletRealTimeClock->WEEKDAY_TUESDAY)
+    {
+        print "Weekday: Tuesday\n";
+    }
+    elsif ($weekday == Tinkerforge::BrickletRealTimeClock->WEEKDAY_WEDNESDAY)
+    {
+        print "Weekday: Wednesday\n";
+    }
+    elsif ($weekday == Tinkerforge::BrickletRealTimeClock->WEEKDAY_THURSDAY)
+    {
+        print "Weekday: Thursday\n";
+    }
+    elsif ($weekday == Tinkerforge::BrickletRealTimeClock->WEEKDAY_FRIDAY)
+    {
+        print "Weekday: Friday\n";
+    }
+    elsif ($weekday == Tinkerforge::BrickletRealTimeClock->WEEKDAY_SATURDAY)
+    {
+        print "Weekday: Saturday\n";
+    }
+    elsif ($weekday == Tinkerforge::BrickletRealTimeClock->WEEKDAY_SUNDAY)
+    {
+        print "Weekday: Sunday\n";
+    }
+
     print "Timestamp: $timestamp\n";
     print "\n";
 }

@@ -24,7 +24,35 @@ print "Hour: $hour\n";
 print "Minute: $minute\n";
 print "Second: $second\n";
 print "Centisecond: $centisecond\n";
-print "Weekday: $weekday\n";
+
+if ($weekday == $rtc->WEEKDAY_MONDAY)
+{
+    print "Weekday: Monday\n";
+}
+elsif ($weekday == $rtc->WEEKDAY_TUESDAY)
+{
+    print "Weekday: Tuesday\n";
+}
+elsif ($weekday == $rtc->WEEKDAY_WEDNESDAY)
+{
+    print "Weekday: Wednesday\n";
+}
+elsif ($weekday == $rtc->WEEKDAY_THURSDAY)
+{
+    print "Weekday: Thursday\n";
+}
+elsif ($weekday == $rtc->WEEKDAY_FRIDAY)
+{
+    print "Weekday: Friday\n";
+}
+elsif ($weekday == $rtc->WEEKDAY_SATURDAY)
+{
+    print "Weekday: Saturday\n";
+}
+elsif ($weekday == $rtc->WEEKDAY_SUNDAY)
+{
+    print "Weekday: Sunday\n";
+}
 
 # Get current timestamp
 my $timestamp = $rtc->get_timestamp();

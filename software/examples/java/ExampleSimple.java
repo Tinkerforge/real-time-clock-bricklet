@@ -28,7 +28,22 @@ public class ExampleSimple {
 		System.out.println("Minute: " + dateTime.minute);
 		System.out.println("Second: " + dateTime.second);
 		System.out.println("Centisecond: " + dateTime.centisecond);
-		System.out.println("Weekday: " + dateTime.weekday);
+
+		if(dateTime.weekday == BrickletRealTimeClock.WEEKDAY_MONDAY) {
+			System.out.println("Weekday: Monday");
+		} else if(dateTime.weekday == BrickletRealTimeClock.WEEKDAY_TUESDAY) {
+			System.out.println("Weekday: Tuesday");
+		} else if(dateTime.weekday == BrickletRealTimeClock.WEEKDAY_WEDNESDAY) {
+			System.out.println("Weekday: Wednesday");
+		} else if(dateTime.weekday == BrickletRealTimeClock.WEEKDAY_THURSDAY) {
+			System.out.println("Weekday: Thursday");
+		} else if(dateTime.weekday == BrickletRealTimeClock.WEEKDAY_FRIDAY) {
+			System.out.println("Weekday: Friday");
+		} else if(dateTime.weekday == BrickletRealTimeClock.WEEKDAY_SATURDAY) {
+			System.out.println("Weekday: Saturday");
+		} else if(dateTime.weekday == BrickletRealTimeClock.WEEKDAY_SUNDAY) {
+			System.out.println("Weekday: Sunday");
+		}
 
 		// Get current timestamp
 		long timestamp = rtc.getTimestamp(); // Can throw com.tinkerforge.TimeoutException
