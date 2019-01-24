@@ -1,0 +1,12 @@
+
+
+# Change XYZ to the UID of your Real-Time Clock Bricklet
+
+setup:
+	# Handle incoming date and time callbacks
+	subscribe to tinkerforge/callback/real_time_clock_bricklet/XYZ/date_time
+	publish '{"register": true}' to tinkerforge/register/real_time_clock_bricklet/XYZ/date_time # Register date_time callback
+	# Set period for date and time callback to 5s (5000ms)
+	# Note: The date and time callback is only called every 5 seconds
+	#       if the date and time has changed since the last call!
+	publish '{"period": 5000}' to tinkerforge/request/real_time_clock_bricklet/XYZ/set_date_time_callback_period
