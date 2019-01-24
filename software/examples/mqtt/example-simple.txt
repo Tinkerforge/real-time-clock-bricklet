@@ -2,8 +2,9 @@
 
 setup:
 	# Get current date and time
-	subscribe to tinkerforge/response/real_time_clock/XYZ/get_date_time
+	subscribe to tinkerforge/response/real_time_clock_bricklet/XYZ/get_date_time
 	publish '' to tinkerforge/request/real_time_clock_bricklet/XYZ/get_date_time 
+	
 	# Get current timestamp
-	subscribe to tinkerforge/response/real_time_clock/XYZ/get_timestamp
+	subscribe to tinkerforge/response/real_time_clock_bricklet/XYZ/get_timestamp
 	publish '' to tinkerforge/request/real_time_clock_bricklet/XYZ/get_timestamp 
