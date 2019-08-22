@@ -63,7 +63,7 @@ int main(void) {
 	// Register date and time callback to function cb_date_time
 	real_time_clock_register_callback(&rtc,
 	                                  REAL_TIME_CLOCK_CALLBACK_DATE_TIME,
-	                                  (void *)cb_date_time,
+	                                  (void (*)(void))cb_date_time,
 	                                  NULL);
 
 	// Set period for date and time callback to 5s (5000ms)
