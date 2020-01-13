@@ -51,5 +51,5 @@ if __name__ == "__main__":
     #       if the date and time has changed since the last call!
     rtc.set_date_time_callback_period(5000)
 
-    raw_input("Press key to exit\n") # Use input() in Python 3
+    input("Press key to exit\n") # Use raw_input() in Python 2
     ipcon.disconnect()
